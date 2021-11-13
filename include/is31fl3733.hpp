@@ -18,7 +18,7 @@
 
 /** IS31FL3733 base address on I2C bus.
   */
-#define IS31FL3733_I2C_BASE_ADDR (0xA0)
+#define IS31FL3733_I2C_BASE_ADDR (0x50)
 
 /** IS31FL3733 ADDR[2:1] connection.
   */
@@ -128,16 +128,19 @@ typedef enum
 class IS31FL3733
 {
 private:
-  /// Address on I2C bus.
-  uint8_t address;
   /// State of individual LED's. Bitmask, that can't be read back from IS31FL3733.
   uint8_t leds[IS31FL3733_SW * IS31FL3733_CS / 8];
+
+public:
+  IS31FL3733(uint8_t addr1, uint8_t addr2);
+
+  /// Address on I2C bus.
+  uint8_t address;
   /// Pointer to I2C write register function.
   uint8_t (*i2c_write_reg)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
   /// Pointer to I2C read register function.
   uint8_t (*i2c_read_reg)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
 
-public:
   /// Read from common register.
   uint8_t ReadCommonReg(uint8_t reg_addr);
   /// Write to common register.
