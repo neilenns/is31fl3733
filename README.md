@@ -1,10 +1,17 @@
-# IS31FL3733 C library #
+# IS31FL3733 C library
+
+This library originally forked from https://github.com/kkostyan/is31fl3733. Planned changes:
+
+- Convert to classes
+- Add explicit Arduino support
+
+Original readme:
 
 This library support Pulse Width Mode (PWM) and Auto Breath Mode (ABM) for IS31FL3733.
 To use device in PWM mode, include `is31fl3733.h` file to your project.
 To use device in ABM mode, include `is31fl3733_abm.h` file to your project.
 
-## Common steps ##
+## Common steps
 
 To work with library in any of this modes you need to declare an instance of IS31FL3733:
 
@@ -20,7 +27,7 @@ Implement an `i2c_write_reg` and `i2c_read_reg` functions (example for STM32):
     {
       return HAL_I2C_Mem_Write (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1);
     }
-    
+
     uint8_t i2c_read_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
     {
       return HAL_I2C_Mem_Read (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1);
@@ -39,7 +46,7 @@ Initialize device:
     // Set Global Current Control.
     IS31FL3733_SetGCC (&is31fl3733_0, 127);
 
-## PWM mode ##
+## PWM mode
 
 Draw something in PWM mode, e.g. set LED brightness at position {1;2} to maximum level:
 
@@ -85,7 +92,7 @@ Also you can update all LEDs state and brightness from an array of values, e.g. 
     // Turn on LED with non-zero brightness.
     IS31FL3733_SetState (&is31fl3733_0, (uint8_t*)heart);
 
-# ABM mode ##
+# ABM mode
 
 To draw automatically pulsed heart from PWM mode example declare an instance of IS31FL3733_ABM structure
 
