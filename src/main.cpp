@@ -33,7 +33,7 @@ uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_
 
 void setup()
 {
-  IS31FL3733 driver(ADDR_GND, ADDR_GND, &i2c_read_reg, &i2c_write_reg);
+  IS31FL3733 driver(IS31FL3733_ADDR::ADDR_GND, IS31FL3733_ADDR::ADDR_GND, &i2c_read_reg, &i2c_write_reg);
 
   // Enable the chip by setting the SDB pin high
   pinMode(SDB_PIN, OUTPUT);
@@ -42,17 +42,11 @@ void setup()
   // Initialize I2C
   Wire.begin();
 
-  // Set up the class. This should really be constructor parameters.
-  driver.address = IS31FL3733_I2C_ADDR(ADDR_GND, ADDR_GND);
-  driver.i2c_read_reg = &i2c_read_reg;
-  driver.i2c_write_reg = &i2c_write_reg;
-
   while (!Serial)
     ; // Waiting for Serial Monitor
 
   Serial.println("\nIS31FL3733B test. Waiting 5 seconds to begin.");
   Serial.print("Device address: 0x");
-  Serial.println(driver.address, HEX);
 
   // This gives enough time to start up a connected logic analyzer
   delay(5000);

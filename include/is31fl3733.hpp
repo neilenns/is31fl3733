@@ -20,13 +20,6 @@
   */
 #define IS31FL3733_I2C_BASE_ADDR (0x50)
 
-/** IS31FL3733 ADDR[2:1] connection.
-  */
-#define ADDR_GND (0x00) ///< ADDRx pin connected to GND.
-#define ADDR_SCL (0x01) ///< ADDRx pin connected to SCL.
-#define ADDR_SDA (0x02) ///< ADDRx pin connected to SDA.
-#define ADDR_VCC (0x03) ///< ADDRx pin connected to VCC.
-
 /** IS31FL3733 real address on I2C bus, see Table 1 on page 9 in datasheet.
     Example: IS31FL3733_I2C_ADDR(ADDR_SDA, ADDR_VCC) is 0xB6 address on I2C bus.
   */
@@ -94,6 +87,34 @@
 #define IS31FL3733_CR_BEN (0x02)         /// Auto breath mode enable bit.
 #define IS31FL3733_CR_SSD (0x01)         /// Software shutdown bit.
 
+/**
+ * @brief Defines the valid connection points for ADDR1 and ADDR2 pins.
+ * 
+ */
+typedef enum
+{
+  /**
+   * @brief Pin connected to GND.
+   * 
+   */
+  ADDR_GND = 0x00,
+  /**
+   * @brief Pin connected to SCL.
+   * 
+   */
+  ADDR_SCL = 0x01,
+  /**
+   * @brief Pin connected to SDA.
+   * 
+   */
+  ADDR_SDA = 0x02,
+  /**
+   * @brief Pin connected to VCC.
+   * 
+   */
+  ADDR_VCC = 0x03
+} IS31FL3733_ADDR;
+
 /// LED state enumeration.
 typedef enum
 {
@@ -131,17 +152,35 @@ typedef uint8_t (*i2c_function)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buf
 class IS31FL3733
 {
 private:
+  /// Address on I2C bus.
+  uint8_t address;
+
+  /// Pointer to I2C read register function.
+  i2c_function i2c_read_reg;
+
+  // Pointer to the i2C write register function.
+  i2c_function i2c_write_reg;
+
   /// State of individual LED's. Bitmask, that can't be read back from IS31FL3733.
   uint8_t leds[IS31FL3733_SW * IS31FL3733_CS / 8];
 
 public:
-  IS31FL3733(uint8_t addr1, uint8_t addr2, i2c_function read_function, i2c_function write_function);
+  /**
+ * @brief Construct a new IS31FL3733 object
+ * 
+ * @param addr1 The ADDR1 pin connection. One of: ADDR_GND, ADDR_PWR
+ * @param addr2 
+ * @param read_function 
+ * @param write_function 
+ */
+  IS31FL3733(IS31FL3733_ADDR addr1, IS31FL3733_ADDR addr2, i2c_function read_function, i2c_function write_function);
 
-  /// Address on I2C bus.
-  uint8_t address;
-  /// Pointer to I2C write register function.
-  i2c_function i2c_read_reg;
-  i2c_function i2c_write_reg;
+  /**
+   * @brief Gets the I2C address for the IS31FL3733. 
+   * 
+   * @return byte The 7-bit I2C address.
+   */
+  byte GetI2CAddress();
 
   /// Read from common register.
   uint8_t ReadCommonReg(uint8_t reg_addr);
