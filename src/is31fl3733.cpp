@@ -2,7 +2,7 @@
 
 IS31FL3733::IS31FL3733(IS31FL3733_ADDR addr1, IS31FL3733_ADDR addr2, i2c_function read_function, i2c_function write_function)
 {
-  address = IS31FL3733_I2C_ADDR(addr1, addr1);
+  address = IS31FL3733_I2C_ADDR(addr2, addr1);
   i2c_read_reg = read_function;
   i2c_write_reg = write_function;
 }
@@ -67,6 +67,11 @@ void IS31FL3733::Init()
   WritePagedReg(IS31FL3733_CR, IS31FL3733_CR_SSD);
   // Clear state of all LEDs in internal buffer and sync buffer to device.
   SetLEDState(IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_STATE_OFF);
+}
+
+byte IS31FL3733::GetI2CAddress()
+{
+  return address;
 }
 
 void IS31FL3733::SetGCC(uint8_t gcc)
