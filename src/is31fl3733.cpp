@@ -31,13 +31,13 @@ namespace IS31FL3733
     i2c_write_reg(address, reg_addr, &reg_value, sizeof(uint8_t));
   }
 
-  void IS31FL3733Driver::SelectPageForRegister(uint8_t reg_addr)
+  void IS31FL3733Driver::SelectPageForRegister(uint16_t reg_addr)
   {
     // Unlock Command Register.
     WriteCommonReg(REGISTERS::PSWL, PSWL_OPTIONS::PSWL_ENABLE);
     // Select requested page in Command Register. The requested page is the
     // top eight bits of the reg_addr.
-    WriteCommonReg(REGISTERS::PSR, (reg_addr >> 8));
+    WriteCommonReg(REGISTERS::PSR, (uint8_t)(reg_addr >> 8));
   }
 
   uint8_t IS31FL3733Driver::ReadPagedReg(uint16_t reg_addr)

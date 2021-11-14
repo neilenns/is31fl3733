@@ -476,7 +476,7 @@ namespace IS31FL3733
     /// Write to common register.
     void WriteCommonReg(uint8_t reg_addr, uint8_t reg_value);
     /// Select active page.
-    void SelectPageForRegister(uint8_t reg_addr);
+    void SelectPageForRegister(uint16_t reg_addr);
     /// Read from paged register.
     uint8_t ReadPagedReg(uint16_t reg_addr);
     /// Write to paged register.
