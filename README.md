@@ -1,118 +1,189 @@
 # IS31FL3733 C library
 
-This library originally forked from https://github.com/kkostyan/is31fl3733. Planned changes:
+This library originally forked from [the C library written by kkostyan](https://github.com/kkostyan/is31fl3733).
+It is functionally equivalent to the C library but updated to use C++, including namespaces, enums, and constants
+instead of #defines. Doxygen comments are provided for all methods. It also combines the ABM support into the core
+library via a compile time flag.
 
-- Convert to classes
-- Add explicit Arduino support
+## Using with PlatformIO
 
-Original readme:
+This library is registered with PlatformIO. Include it in your project via the PlatformIO library
+manager.
 
-This library support Pulse Width Mode (PWM) and Auto Breath Mode (ABM) for IS31FL3733.
-To use device in PWM mode, include `is31fl3733.h` file to your project.
-To use device in ABM mode, include `is31fl3733_abm.h` file to your project.
+## Using with other toolchains
+
+Include `is31fl3733.hpp` and `is31fl3733.cpp` in your project.
 
 ## Common steps
 
-To work with library in any of this modes you need to declare an instance of IS31FL3733:
+The following code samples illustrate common tasks.
 
-    IS31FL3733 is31fl3733_0;
+### Creating a new instance of the driver
 
-Multiple instances with different I2C addresses on same or different I2C buses can be declared.
+To work with library in any of this modes you need to declare an instance of IS31FL3733Driver,
+providing the connections for the `ADDR1` and `ADDR2` pins and [functions for reading and writing
+I2C data](#Implementing_the_read_and_write_register_functions):
 
-Implement an `i2c_write_reg` and `i2c_read_reg` functions (example for STM32):
+```C++
+using namespace IS31FL3733
+IS31FL3733Driver driver(ADDR::GND, ADDR::GND, &i2c_read_reg, &i2c_write_reg);
+```
 
-    I2C_HandleTypeDef hi2c1;
+### Implementing the read and write register functions
 
-    uint8_t i2c_write_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
-    {
-      return HAL_I2C_Mem_Write (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1);
-    }
+The `i2c_read_reg` and `i2c_write_reg` functions must be implmeneted for each platform
+and take care of reading and writing data on the I2C bus.
 
-    uint8_t i2c_read_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
-    {
-      return HAL_I2C_Mem_Read (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1);
-    }
+Example implementations for Arduino:
 
-Set instance parameters and pointer to `i2c_write_reg` and `i2c_read_reg` functions:
+```C++
+uint8_t i2c_write_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
+{
+  Wire.beginTransmission(i2c_addr);
+  Wire.write(reg_addr);
+  byte bytesWritten = Wire.write(buffer, count);
+  Wire.endTransmission();
 
-    is31fl3733_0.address = IS31FL3733_I2C_ADDR(ADDR_GND, ADDR_GND);
-    is31fl3733_0.i2c_write_reg = &i2c_write_reg;
-    is31fl3733_0.i2c_read_reg = &i2c_read_reg;
+  return bytesWritten;
+}
 
-Initialize device:
+uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
+{
+  Wire.beginTransmission(i2c_addr);
+  Wire.write(reg_addr);
+  Wire.endTransmission();
+  byte bytesRead = Wire.requestFrom(i2c_addr, count);
+  for (int i = 0; i < bytesRead && i < count; i++)
+  {
+    buffer[i] = Wire.read();
+  }
+  return bytesRead;
+}
+```
 
-    // Initialize device.
-    IS31FL3733_Init (&is31fl3733_0);
-    // Set Global Current Control.
-    IS31FL3733_SetGCC (&is31fl3733_0, 127);
+Example implementations for STM32:
 
-## PWM mode
+```C++
+I2C_HandleTypeDef hi2c1;
 
-Draw something in PWM mode, e.g. set LED brightness at position {1;2} to maximum level:
+uint8_t i2c_write_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
+{
+    return HAL_I2C_Mem_Write (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1000);
+}
 
-    // Set PWM value for LED at {1;2}.
-    IS31FL3733_SetLEDPWM (&is31fl3733_0, 1, 2, 255);
-    // Turn on LED at position {1;2}.
-    IS31FL3733_SetLEDState (&is31fl3733_0, 1, 2, IS31FL3733_LED_STATE_ON);
+uint8_t i2c_read_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
+{
+    return HAL_I2C_Mem_Read (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1000);
+}
+```
 
-You can control all LED's in column/row and full LED matrix:
+### Initializing the device
 
-    // Set PWM values for all LEDs at 1-st column to 15/255 level.
-    IS31FL3733_SetLEDPWM (&is31fl3733_0, 1, IS31FL3733_SW, 15);
-    // Turn on selected LEDs.
-    IS31FL3733_SetLEDState (&is31fl3733_0, 1, IS31FL3733_SW, IS31FL3733_LED_STATE_ON);
-    // Set PWM values for all LEDs at 7-th row to 55/255 level.
-    IS31FL3733_SetLEDPWM (&is31fl3733_0, IS31FL3733_CS, 7, 55);
-    // Turn on selected LEDs.
-    IS31FL3733_SetLEDState (&is31fl3733_0, IS31FL3733_CS, 7, IS31FL3733_LED_STATE_ON);
-    // Set PWM values for all LEDs in matrix to 146/255 level.
-    IS31FL3733_SetLEDPWM (&is31fl3733_0, IS31FL3733_CS, IS31FL3733_SW, 146);
-    // Turn on selected LEDs.
-    IS31FL3733_SetLEDState (&is31fl3733_0, IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_STATE_ON);
+The first step in using the IS31FL3733 is to initialize the chip and set the global current
+control. This is done with the `Init()` and `SetGCC()` methods:
+
+```C++
+// Reset the chip to a clean startup state.
+driver.Init();
+// Set global current control to half the max value.
+driver.SetGCC(127);
+```
+
+### Setting PWM values
+
+PWN values are set using the `SetLEDPWM()` method and LEDs are turned on and off
+using the `SetLEDState()` method.
+
+```C++
+// Set PWM value for LED at {1, 2} to maximum brightness.
+driver.SetLEDPWM (1, 2, 255);
+// Turn on LED at position {1, 2}.
+driver.SetLEDState (1, 2, LEDSTATE::On);
+```
+
+In addition to setting a single LED you can also control all LEDs in a row or column
+or all LEDs in the matrix:
+
+```C++
+// Set PWM values for all LEDs in the first column to 15.
+driver.SetLEDPWM (1, SW_LINES, 15);
+// Turn on all LEDs in the first column.
+driver.SetLEDState (1, SW_LINES, LED_STATE::ON);
+
+// Set PWM values for all LEDs in the seventh row to 55.
+driver.SetLEDPWM (CS_LINES, 7, 55);
+// Turn on all LEDs in the seventh row.
+driver.SetLEDState (CS_LINES, 7, LED_STATE::ON);
+
+// Set PWM values for all LEDs in the matrix to 146.
+driver.SetLEDPWM (CS_LINES, SW_LINES, 146);
+// Turn on all LEDs in the matrix
+driver.SetLEDState (CS_LINES, SW_LINES, LED_STATE::ON);
+```
 
 Also you can update all LEDs state and brightness from an array of values, e.g. draw a heart figure:
 
-    // 16x12 heart figure.
-    static const uint8_t heart[] = {
-      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0x00,
-      0x00,0x00,0x00,0xff,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0xff,0x00,0x00,0x00,
-      0x00,0x00,0x00,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00,
-      0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
-    };
-    // Set LED brightness for all LEDs from an array.
-    IS31FL3733_SetPWM (&is31fl3733_0, (uint8_t*)heart);
-    // Turn on LED with non-zero brightness.
-    IS31FL3733_SetState (&is31fl3733_0, (uint8_t*)heart);
+```C++
+// 16x12 heart figure.
+const uint8_t heart[] = {
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0x00,
+    0x00,0x00,0x00,0xff,0x00,0x00,0xff,0xff,0xff,0xff,0x00,0x00,0xff,0x00,0x00,0x00,
+    0x00,0x00,0x00,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00,
+    0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+};
 
-# ABM mode
+// Set LED brightness for all LEDs from an array.
+driver.SetPWM ((uint8_t*)heart);
+// Turn on LEDs with non-zero brightness.
+driver.SetState ((uint8_t*)heart);
+```
 
-To draw automatically pulsed heart from PWM mode example declare an instance of IS31FL3733_ABM structure
+## ABM mode
 
-    IS31FL3733_ABM ABM1;
+The libray supports the IS31FL3733 automatic breath mode in addition to the standard PWM brightness mode.
+To enable ABM support you must define `ENABLE_PWM` at compile time. For PlatformIO builds add the following
+to each platform in the `platformio.ini` file:
 
-Initialize device to ABM mode, set ABM mode parameters and start ABM mode operation:
+```yaml
+build_flags =
+    -DENABLE_ABM
+```
 
-    // Turn on LEDs for heart figure.
-    IS31FL3733_SetState (&is31fl3733_0, (uint8_t*)heart);
-    // Configure all matrix LEDs to work in ABM1 mode.
-    IS31FL3733_SetLEDMode (&is31fl3733_0, IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_MODE_ABM1);
-    // Set ABM mode structure parameters.
-    ABM1.T1 = IS31FL3733_ABM_T1_840MS;
-    ABM1.T2 = IS31FL3733_ABM_T2_840MS;
-    ABM1.T3 = IS31FL3733_ABM_T3_840MS;
-    ABM1.T4 = IS31FL3733_ABM_T4_840MS;
-    ABM1.Tbegin = IS31FL3733_ABM_LOOP_BEGIN_T4;
-    ABM1.Tend = IS31FL3733_ABM_LOOP_END_T3;
-    ABM1.Times = IS31FL3733_ABM_LOOP_FOREVER;
-    // Write ABM structure parameters to device registers.
-    IS31FL3733_ConfigABM (&is31fl3733_0, IS31FL3733_ABM_NUM_1, &ABM1);
-    // Start ABM mode operation.
-    IS31FL3733_StartABM (&is31fl3733_0);
+### Initializing ABM mode, setting parameters, and starting ABM
+
+To set up ABM mode first turn on the desired LEDs, then set the LED mode to one of the available
+types of ABM:
+
+```C++
+// Turn on LEDs for heart figure.
+driver.SetState ((uint8_t*)heart);
+// Configure all matrix LEDs to work in ABM1 mode.
+driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
+```
+
+Then configure the ABM parameters and start ABM mode:
+
+```C++
+ABM_CONFIG ABM1;
+
+ABM1.T1 = ABM_T1::T1_840MS;
+ABM1.T2 = ABM_T2::T2_840MS;
+ABM1.T3 = ABM_T3::T3_840MS;
+ABM1.T4 = ABM_T4::T4_840MS;
+ABM1.Tbegin = ABM_LOOP_BEGIN::LOOP_BEGIN_T4;
+ABM1.Tend = ABM_LOOP_END::LOOP_END_T3;
+ABM1.Times = ABM_LOOP_FOREVER;
+
+// Write ABM structure parameters.
+driver.ConfigABM(ABM_NUM::NUM_1, &ABM1);
+// Start ABM mode operation.
+driver.StartABM();
+```
