@@ -21,12 +21,5 @@
   "platforms": "*",
   "export": {
     "include": ["src/is31fl3733.cpp", "include/is31fl3733.hpp"]
-  },
-  "examples": [
-    {
-      "name": "Turn on all LEDs with ABM mode",
-      "base": "src/",
-      "files": ["main.cpp"]
-    }
-  ]
+  }
 }
