@@ -33,7 +33,7 @@ uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_
 
 void setup()
 {
-  IS31FL3733 driver(ADDR_GND, ADDR_GND);
+  IS31FL3733 driver(ADDR_GND, ADDR_GND, &i2c_read_reg, &i2c_write_reg);
 
   // Enable the chip by setting the SDB pin high
   pinMode(SDB_PIN, OUTPUT);
@@ -64,7 +64,7 @@ void setup()
   Serial.println("Setting PWM state for all LEDs");
   driver.SetLEDPWM(IS31FL3733_CS, IS31FL3733_SW, 255);
   Serial.println("Turning on all LEDs");
-  driver.SetLEDState(IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_STATE_ON);
+  driver.SetLEDState(0, 0, IS31FL3733_LED_STATE_ON);
 }
 
 void loop()

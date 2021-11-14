@@ -1,8 +1,10 @@
 #include "is31fl3733.hpp"
 
-IS31FL3733::IS31FL3733(uint8_t addr1, uint8_t addr2)
+IS31FL3733::IS31FL3733(uint8_t addr1, uint8_t addr2, i2c_function read_function, i2c_function write_function)
 {
   address = IS31FL3733_I2C_ADDR(addr1, addr1);
+  i2c_read_reg = read_function;
+  i2c_write_reg = write_function;
 }
 
 uint8_t IS31FL3733::ReadCommonReg(uint8_t reg_addr)

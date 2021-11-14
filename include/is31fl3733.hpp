@@ -123,6 +123,9 @@ typedef enum
   IS31FL3733_RESISTOR_32K = 0x07  ///< 32 kOhm pull-up resistor.
 } IS31FL3733_RESISTOR;
 
+// Function definitions for reading and writing the registers.
+typedef uint8_t (*i2c_function)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
+
 /** IS31FL3733 class.
   */
 class IS31FL3733
@@ -132,14 +135,13 @@ private:
   uint8_t leds[IS31FL3733_SW * IS31FL3733_CS / 8];
 
 public:
-  IS31FL3733(uint8_t addr1, uint8_t addr2);
+  IS31FL3733(uint8_t addr1, uint8_t addr2, i2c_function read_function, i2c_function write_function);
 
   /// Address on I2C bus.
   uint8_t address;
   /// Pointer to I2C write register function.
-  uint8_t (*i2c_write_reg)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
-  /// Pointer to I2C read register function.
-  uint8_t (*i2c_read_reg)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
+  i2c_function i2c_read_reg;
+  i2c_function i2c_write_reg;
 
   /// Read from common register.
   uint8_t ReadCommonReg(uint8_t reg_addr);
