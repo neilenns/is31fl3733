@@ -72,7 +72,7 @@ void setup()
   Serial.println("Configure all LEDs for ABM1");
   driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
 
-  ABM ABM1;
+  ABM_CONFIG ABM1;
 
   ABM1.T1 = ABM_T1::T1_840MS;
   ABM1.T2 = ABM_T2::T2_840MS;
