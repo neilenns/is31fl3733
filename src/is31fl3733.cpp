@@ -341,7 +341,6 @@ namespace IS31FL3733
     WritePagedRegs(PAGEDREGISTER::LEDPWM, values, SW_LINES * CS_LINES);
   }
 
-#ifdef ENABLE_ABM
   void IS31FL3733Driver::SetLEDMode(uint8_t cs, uint8_t sw, LED_MODE mode)
   {
     uint8_t offset;
@@ -422,5 +421,4 @@ namespace IS31FL3733
     // Write 0x00 to Time Update Register to update ABM settings.
     WritePagedReg(PAGEDREGISTER::TUR, 0x00);
   }
-#endif
 }
