@@ -1,7 +1,7 @@
 {
-  "name": "IS31fl3733Driver",
+  "name": "IS31Fl3733Driver",
   "version": "1.0.0",
-  "description": "Provides a C++ class to control the ISSI IS31fl3733 12x16 LED matrix driver chip.",
+  "description": "Provides a C++ class to control the ISSI IS31fl3733 12x16 LED matrix driver chip. Based on the original C library by kkostyan.A",
   "keywords": "IS31fl3733, ISSI, LED matrix",
   "repository": {
     "type": "git",
