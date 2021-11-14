@@ -116,9 +116,6 @@ namespace IS31FL3733
     RESISTOR_32K = 0x07  //< 32 kOhm pull-up resistor.
   };
 
-// ****************************************************************
-// Start ABM support
-#ifdef ENABLE_ABM
   /// @brief Maximum number of ABM loop times.
   const int ABM_LOOP_TIMES_MAX = 0x0FFF;
 
@@ -225,10 +222,6 @@ namespace IS31FL3733
     ABM_LOOP_END Tend;     ///< Position in sequence where loop ends.
     uint16_t Times;        ///< Number of times to loop. Set to ABM_LOOP_FOREVER to loop forever.
   };
-
-#endif
-  // End ABW support
-  // ****************************************************************
 
   /// @brief Function definition for reading and writing the registers.
   typedef uint8_t (*i2c_function)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
@@ -343,8 +336,6 @@ namespace IS31FL3733
     /// @param states An array of PWM values for all 192 LEDs.
     void SetPWM(uint8_t *values);
 
-// ABM functions
-#ifdef ENABLE_ABM
     /// @brief Sets the LED operating mode for an LED.
     /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
     /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
@@ -358,6 +349,5 @@ namespace IS31FL3733
 
     /// @brief Starts ABM operation.
     void StartABM();
-#endif
   };
 }

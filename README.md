@@ -146,17 +146,6 @@ driver.SetPWM ((uint8_t*)heart);
 driver.SetState ((uint8_t*)heart);
 ```
 
-## ABM mode
-
-The libray supports the IS31FL3733 automatic breath mode in addition to the standard PWM brightness mode.
-To enable ABM support you must define `ENABLE_PWM` at compile time. For PlatformIO builds add the following
-to each platform in the `platformio.ini` file:
-
-```yaml
-build_flags =
-    -DENABLE_ABM
-```
-
 ### Initializing ABM mode, setting parameters, and starting ABM
 
 To set up ABM mode first turn on the desired LEDs, then set the LED mode to one of the available
