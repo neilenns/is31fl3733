@@ -3,6 +3,7 @@
 IS31FL3733::IS31FL3733(IS31FL3733_ADDR addr1, IS31FL3733_ADDR addr2, i2c_function read_function, i2c_function write_function)
 {
   address = IS31FL3733_I2C_ADDR(addr2, addr1);
+
   i2c_read_reg = read_function;
   i2c_write_reg = write_function;
 }

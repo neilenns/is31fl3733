@@ -18,12 +18,17 @@
 
 /** IS31FL3733 base address on I2C bus.
   */
-#define IS31FL3733_I2C_BASE_ADDR (0x50)
+#define IS31FL3733_I2C_BASE_ADDR (0xA0)
 
 /** IS31FL3733 real address on I2C bus, see Table 1 on page 9 in datasheet.
     Example: IS31FL3733_I2C_ADDR(ADDR_SDA, ADDR_VCC) is 0xB6 address on I2C bus.
   */
-#define IS31FL3733_I2C_ADDR(ADDR2, ADDR1) ((IS31FL3733_I2C_BASE_ADDR) | ((ADDR2) << 3) | ((ADDR1) << 1))
+#ifdef ARDUINO
+// Arduino expects a 7 bit address without the R/W bit on the end.
+#define IS31FL3733_I2C_ADDR(ADDR2, ADDR1) (((IS31FL3733_I2C_BASE_ADDR) | ((ADDR2) << 3) | ((ADDR1))) >> 1)
+#else
+#define IS31FL3733_I2C_ADDR(ADDR2, ADDR1) ((IS31FL3733_I2C_BASE_ADDR) | ((ADDR2) << 3) | ((ADDR1)))
+#endif
 
 /** IS31FL3733 common registers.
   */

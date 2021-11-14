@@ -33,10 +33,6 @@ uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_
 
 void setup()
 {
-  // Create a new driver with the address pins tied to ground, and provide the I2C read and write
-  // functions.
-  IS31FL3733 driver(IS31FL3733_ADDR_GND, IS31FL3733_ADDR_GND, &i2c_read_reg, &i2c_write_reg);
-
   // Enable the chip by setting the SDB pin high
   pinMode(SDB_PIN, OUTPUT);
   digitalWrite(SDB_PIN, HIGH);
@@ -48,8 +44,13 @@ void setup()
   while (!Serial)
     ; // Waiting for Serial Monitor
 
-  Serial.println("\nIS31FL3733B test. Waiting 5 seconds to begin.");
-  Serial.print("Device address: 0x");
+  // Create a new driver with the address pins tied to ground, and provide the I2C read and write
+  // functions.
+  IS31FL3733 driver(IS31FL3733_ADDR_GND, IS31FL3733_ADDR_GND, &i2c_read_reg, &i2c_write_reg);
+
+  Serial.print("\nIS31FL3733B test of driver at address 0x");
+  Serial.println(driver.GetI2CAddress(), HEX);
+  Serial.println("Waiting 5 seconds to begin.");
 
   // This gives enough time to start up a connected logic analyzer
   delay(5000);
