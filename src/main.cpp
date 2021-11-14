@@ -65,6 +65,24 @@ void setup()
 
   Serial.println("Turning on all LEDs");
   driver.SetLEDState(IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_STATE_ON);
+
+  Serial.println("Configure all LEDs for ABM1");
+  driver.SetLEDMode(IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_MODE_ABM1);
+
+  IS31FL3733_ABM ABM1;
+
+  ABM1.T1 = IS31FL3733_ABM_T1_840MS;
+  ABM1.T2 = IS31FL3733_ABM_T2_840MS;
+  ABM1.T3 = IS31FL3733_ABM_T3_840MS;
+  ABM1.T4 = IS31FL3733_ABM_T4_840MS;
+  ABM1.Tbegin = IS31FL3733_ABM_LOOP_BEGIN_T4;
+  ABM1.Tend = IS31FL3733_ABM_LOOP_END_T3;
+  ABM1.Times = IS31FL3733_ABM_LOOP_FOREVER;
+
+  // Write ABM structure parameters to device registers.
+  driver.ConfigABM(IS31FL3733_ABM_NUM_1, &ABM1);
+  // Start ABM mode operation.
+  driver.StartABM();
 }
 
 void loop()
