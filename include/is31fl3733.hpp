@@ -97,22 +97,22 @@ typedef enum
    * @brief Pin connected to GND.
    * 
    */
-  ADDR_GND = 0x00,
+  IS31FL3733_ADDR_GND = 0x00,
   /**
    * @brief Pin connected to SCL.
    * 
    */
-  ADDR_SCL = 0x01,
+  IS31FL3733_ADDR_SCL = 0x01,
   /**
    * @brief Pin connected to SDA.
    * 
    */
-  ADDR_SDA = 0x02,
+  IS31FL3733_ADDR_SDA = 0x02,
   /**
    * @brief Pin connected to VCC.
    * 
    */
-  ADDR_VCC = 0x03
+  IS31FL3733_ADDR_VCC = 0x03
 } IS31FL3733_ADDR;
 
 /// LED state enumeration.
