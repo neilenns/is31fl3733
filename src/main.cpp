@@ -6,6 +6,8 @@
 // Arduino pin for the SDB line, which is set high to enable the IS31FL3733 chip.
 #define SDB_PIN 4
 
+using namespace IS31FL3733;
+
 // Write a buffer to I2C.
 uint8_t i2c_write_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
 {
@@ -46,7 +48,7 @@ void setup()
 
   // Create a new driver with the address pins tied to ground, and provide the I2C read and write
   // functions.
-  IS31FL3733 driver(IS31FL3733_ADDR_GND, IS31FL3733_ADDR_GND, &i2c_read_reg, &i2c_write_reg);
+  IS31FL3733Driver driver(ADDR::GND, ADDR::GND, &i2c_read_reg, &i2c_write_reg);
 
   Serial.print("\nIS31FL3733B test of driver at address 0x");
   Serial.println(driver.GetI2CAddress(), HEX);
@@ -62,26 +64,26 @@ void setup()
   driver.SetGCC(127);
 
   Serial.println("Setting PWM state for all LEDs to full power");
-  driver.SetLEDPWM(IS31FL3733_CS, IS31FL3733_SW, 255);
+  driver.SetLEDPWM(CS_LINES, SW_LINES, 255);
 
   Serial.println("Turning on all LEDs");
-  driver.SetLEDState(IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_STATE_ON);
+  driver.SetLEDState(CS_LINES, SW_LINES, LED_STATE::ON);
 
   Serial.println("Configure all LEDs for ABM1");
-  driver.SetLEDMode(IS31FL3733_CS, IS31FL3733_SW, IS31FL3733_LED_MODE_ABM1);
+  driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
 
-  IS31FL3733_ABM ABM1;
+  ABM ABM1;
 
-  ABM1.T1 = IS31FL3733_ABM_T1_840MS;
-  ABM1.T2 = IS31FL3733_ABM_T2_840MS;
-  ABM1.T3 = IS31FL3733_ABM_T3_840MS;
-  ABM1.T4 = IS31FL3733_ABM_T4_840MS;
-  ABM1.Tbegin = IS31FL3733_ABM_LOOP_BEGIN_T4;
-  ABM1.Tend = IS31FL3733_ABM_LOOP_END_T3;
-  ABM1.Times = IS31FL3733_ABM_LOOP_FOREVER;
+  ABM1.T1 = ABM_T1::T1_840MS;
+  ABM1.T2 = ABM_T2::T2_840MS;
+  ABM1.T3 = ABM_T3::T3_840MS;
+  ABM1.T4 = ABM_T4::T4_840MS;
+  ABM1.Tbegin = ABM_LOOP_BEGIN::LOOP_BEGIN_T4;
+  ABM1.Tend = ABM_LOOP_END::LOOP_END_T3;
+  ABM1.Times = ABM_LOOP_FOREVER;
 
   // Write ABM structure parameters to device registers.
-  driver.ConfigABM(IS31FL3733_ABM_NUM_1, &ABM1);
+  driver.ConfigABM(ABM_NUM::NUM_1, &ABM1);
   // Start ABM mode operation.
   driver.StartABM();
 }
