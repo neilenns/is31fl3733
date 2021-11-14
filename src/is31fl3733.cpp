@@ -15,68 +15,83 @@ namespace IS31FL3733
     i2c_write_reg = write_function;
   }
 
-  uint8_t IS31FL3733Driver::ReadCommonReg(uint8_t reg_addr)
+  uint8_t IS31FL3733Driver::ReadCommonReg(COMMONREGISTER reg)
   {
     uint8_t reg_value;
 
     // Read value from register.
-    i2c_read_reg(address, reg_addr, &reg_value, sizeof(uint8_t));
+    i2c_read_reg(address, reg, &reg_value, sizeof(uint8_t));
     // Return register value.
     return reg_value;
   }
 
-  void IS31FL3733Driver::WriteCommonReg(uint8_t reg_addr, uint8_t reg_value)
+  void IS31FL3733Driver::WriteCommonReg(COMMONREGISTER reg, uint8_t reg_value)
   {
     // Write value to register.
-    i2c_write_reg(address, reg_addr, &reg_value, sizeof(uint8_t));
+    i2c_write_reg(address, reg, &reg_value, sizeof(uint8_t));
   }
 
-  void IS31FL3733Driver::SelectPageForRegister(uint16_t reg_addr)
+  void IS31FL3733Driver::SelectPageForRegister(PAGEDREGISTER reg)
   {
     // Unlock Command Register.
-    WriteCommonReg(REGISTERS::PSWL, PSWL_OPTIONS::PSWL_ENABLE);
+    WriteCommonReg(COMMONREGISTER::PSWL, PSWL_OPTIONS::PSWL_ENABLE);
     // Select requested page in Command Register. The requested page is the
-    // top eight bits of the reg_addr.
-    WriteCommonReg(REGISTERS::PSR, (uint8_t)(reg_addr >> 8));
+    // high byte of reg.
+    WriteCommonReg(COMMONREGISTER::PSR, (uint8_t)(reg >> 8));
   }
 
-  uint8_t IS31FL3733Driver::ReadPagedReg(uint16_t reg_addr)
+  uint8_t IS31FL3733Driver::ReadPagedReg(PAGEDREGISTER reg)
+  {
+    return ReadPagedReg(reg, 0);
+  }
+
+  uint8_t IS31FL3733Driver::ReadPagedReg(PAGEDREGISTER reg, uint8_t offset)
   {
     uint8_t reg_value;
 
     // Select register page.
-    SelectPageForRegister(reg_addr);
+    SelectPageForRegister(reg);
     // Read value from register.
     // The register is the low eight bits of the reg_addr.
-    i2c_read_reg(address, (uint8_t)(reg_addr), &reg_value, sizeof(uint8_t));
+    i2c_read_reg(address, (uint8_t)(reg) + offset, &reg_value, sizeof(uint8_t));
     // Return register value.
     return reg_value;
   }
 
-  void IS31FL3733Driver::WritePagedReg(uint16_t reg_addr, uint8_t reg_value)
+  void IS31FL3733Driver::WritePagedReg(PAGEDREGISTER reg, uint8_t reg_value)
   {
-    // Select register page.
-    SelectPageForRegister(reg_addr);
-    // Write value to register.
-    // The register is the low eight bits of the reg_addr.
-    i2c_write_reg(address, (uint8_t)(reg_addr), &reg_value, sizeof(uint8_t));
+    WritePagedReg(reg, 0, reg_value);
   }
 
-  void IS31FL3733Driver::WritePagedRegs(uint16_t reg_addr, uint8_t *values, uint8_t count)
+  void IS31FL3733Driver::WritePagedReg(PAGEDREGISTER reg, uint8_t offset, uint8_t reg_value)
+  {
+    // Select register page.
+    SelectPageForRegister(reg);
+    // Write value to register.
+    // The register is the low eight bits of the reg.
+    i2c_write_reg(address, (uint8_t)(reg) + offset, &reg_value, sizeof(uint8_t));
+  }
+
+  void IS31FL3733Driver::WritePagedRegs(PAGEDREGISTER reg, uint8_t *values, uint8_t count)
+  {
+    WritePagedRegs(reg, 0, values, count);
+  }
+
+  void IS31FL3733Driver::WritePagedRegs(PAGEDREGISTER reg, uint8_t offset, uint8_t *values, uint8_t count)
   {
     // Select registers page.
-    SelectPageForRegister(reg_addr);
+    SelectPageForRegister(reg);
     // Write values to registers.
     // The register is the low eight bits of the reg_addr.
-    i2c_write_reg(address, (uint8_t)(reg_addr), values, count);
+    i2c_write_reg(address, (uint8_t)(reg) + offset, values, count);
   }
 
   void IS31FL3733Driver::Init()
   {
     // Read reset register to reset device.
-    ReadPagedReg(REGISTERS::RESET);
+    ReadPagedReg(PAGEDREGISTER::RESET);
     // Clear software reset in configuration register.
-    WritePagedReg(REGISTERS::CR, CR_OPTIONS::CR_SSD);
+    WritePagedReg(PAGEDREGISTER::CR, CR_OPTIONS::CR_SSD);
     // Clear state of all LEDs in internal buffer and sync buffer to device.
     SetLEDState(CS_LINES, SW_LINES, LED_STATE::OFF);
   }
@@ -89,19 +104,19 @@ namespace IS31FL3733
   void IS31FL3733Driver::SetGCC(uint8_t gcc)
   {
     // Write gcc value to Global Current Control (GCC) register.
-    WritePagedReg(REGISTERS::GCC, gcc);
+    WritePagedReg(PAGEDREGISTER::GCC, gcc);
   }
 
   void IS31FL3733Driver::SetSWPUR(RESISTOR resistor)
   {
     // Write resistor value to SWPUR register.
-    WritePagedReg(REGISTERS::SWPUR, resistor);
+    WritePagedReg(PAGEDREGISTER::SWPUR, resistor);
   }
 
   void IS31FL3733Driver::SetCSPDR(RESISTOR resistor)
   {
     // Write resistor value to CSPDR register.
-    WritePagedReg(REGISTERS::CSPDR, resistor);
+    WritePagedReg(PAGEDREGISTER::CSPDR, resistor);
   }
 
   void IS31FL3733Driver::SetLEDState(uint8_t cs, uint8_t sw, LED_STATE state)
@@ -129,7 +144,7 @@ namespace IS31FL3733
           leds[offset] |= 0x01 << (cs % 8);
         }
         // Write updated LED state to device register.
-        WritePagedReg(REGISTERS::LEDONOFF + offset, leds[offset]);
+        WritePagedReg(PAGEDREGISTER::LEDONOFF, offset, leds[offset]);
       }
       else
       {
@@ -150,7 +165,7 @@ namespace IS31FL3733
           leds[offset + 1] = 0xFF;
         }
         // Write updated LEDs state to device registers.
-        WritePagedRegs(REGISTERS::LEDONOFF + offset, &leds[offset], CS_LINES / 8);
+        WritePagedRegs(PAGEDREGISTER::LEDONOFF, offset, &leds[offset], CS_LINES / 8);
       }
     }
     else
@@ -175,7 +190,7 @@ namespace IS31FL3733
             leds[offset] |= 0x01 << (cs % 8);
           }
           // Write updated LED state to device register.
-          WritePagedReg(REGISTERS::LEDONOFF + offset, leds[offset]);
+          WritePagedReg(PAGEDREGISTER::LEDONOFF, offset, leds[offset]);
         }
       }
       else
@@ -198,7 +213,7 @@ namespace IS31FL3733
           }
         }
         // Write updated LEDs state to device registers.
-        WritePagedRegs(REGISTERS::LEDONOFF, leds, SW_LINES * CS_LINES / 8);
+        WritePagedRegs(PAGEDREGISTER::LEDONOFF, leds, SW_LINES * CS_LINES / 8);
       }
     }
   }
@@ -217,7 +232,7 @@ namespace IS31FL3733
         // Calculate LED offset.
         offset = sw * CS_LINES + cs;
         // Write LED PWM value to device register.
-        WritePagedReg(REGISTERS::LEDPWM + offset, value);
+        WritePagedReg(PAGEDREGISTER::LEDPWM, offset, value);
       }
       else
       {
@@ -227,7 +242,7 @@ namespace IS31FL3733
           // Calculate LED offset.
           offset = sw * CS_LINES + cs;
           // Write LED PWM value to device register.
-          WritePagedReg(REGISTERS::LEDPWM + offset, value);
+          WritePagedReg(PAGEDREGISTER::LEDPWM, offset, value);
         }
       }
     }
@@ -242,7 +257,7 @@ namespace IS31FL3733
           // Calculate LED offset.
           offset = sw * CS_LINES + cs;
           // Write LED PWM value to device register.
-          WritePagedReg(REGISTERS::LEDPWM + offset, value);
+          WritePagedReg(PAGEDREGISTER::LEDPWM, offset, value);
         }
       }
       else
@@ -255,7 +270,7 @@ namespace IS31FL3733
             // Calculate LED offset.
             offset = sw * CS_LINES + cs;
             // Write LED PWM value to device register.
-            WritePagedReg(REGISTERS::LEDPWM + offset, value);
+            WritePagedReg(PAGEDREGISTER::LEDPWM, offset, value);
           }
         }
       }
@@ -272,12 +287,12 @@ namespace IS31FL3733
       // Calculate LED bit offset.
       offset = (sw << 1) + (cs / 8);
       // Get Open status from device register.
-      if (ReadPagedReg(REGISTERS::LEDOPEN + offset) & (0x01 << (cs % 8)))
+      if (ReadPagedReg(PAGEDREGISTER::LEDOPEN, offset) & (0x01 << (cs % 8)))
       {
         return LED_STATUS::OPEN;
       }
       // Get Short status from device register.
-      if (ReadPagedReg(REGISTERS::LEDSHORT + offset) & (0x01 << (cs % 8)))
+      if (ReadPagedReg(PAGEDREGISTER::LEDSHORT, offset) & (0x01 << (cs % 8)))
       {
         return LED_STATUS::SHORT;
       }
@@ -317,13 +332,13 @@ namespace IS31FL3733
       }
     }
     // Write updated LEDs state to device registers.
-    WritePagedRegs(REGISTERS::LEDONOFF, leds, SW_LINES * CS_LINES / 8);
+    WritePagedRegs(PAGEDREGISTER::LEDONOFF, leds, SW_LINES * CS_LINES / 8);
   }
 
   void IS31FL3733Driver::SetPWM(uint8_t *values)
   {
     // Write LED PWM values to device registers.
-    WritePagedRegs(REGISTERS::LEDPWM, values, SW_LINES * CS_LINES);
+    WritePagedRegs(PAGEDREGISTER::LEDPWM, values, SW_LINES * CS_LINES);
   }
 
 #ifdef ENABLE_ABM
@@ -341,7 +356,7 @@ namespace IS31FL3733
         // Calculate LED offset.
         offset = sw * CS_LINES + cs;
         // Write LED mode to device register.
-        WritePagedReg(REGISTERS::LEDABM + offset, mode);
+        WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
       }
       else
       {
@@ -351,7 +366,7 @@ namespace IS31FL3733
           // Calculate LED offset.
           offset = sw * CS_LINES + cs;
           // Write LED mode to device register.
-          WritePagedReg(REGISTERS::LEDABM + offset, mode);
+          WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
         }
       }
     }
@@ -366,7 +381,7 @@ namespace IS31FL3733
           // Calculate LED offset.
           offset = sw * CS_LINES + cs;
           // Write LED mode to device register.
-          WritePagedReg(REGISTERS::LEDABM + offset, mode);
+          WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
         }
       }
       else
@@ -379,7 +394,7 @@ namespace IS31FL3733
             // Calculate LED offset.
             offset = sw * CS_LINES + cs;
             // Write LED mode to device register.
-            WritePagedReg(REGISTERS::LEDABM + offset, mode);
+            WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
           }
         }
       }
@@ -389,23 +404,23 @@ namespace IS31FL3733
   void IS31FL3733Driver::ConfigABM(ABM_NUM n, ABM_CONFIG *config)
   {
     // Set fade in and fade out time.
-    WritePagedReg(n, config->T1 | config->T2);
+    WritePagedReg((PAGEDREGISTER)n, config->T1 | config->T2);
     // Set hold and off time.
-    WritePagedReg(n + 1, config->T3 | config->T4);
+    WritePagedReg((PAGEDREGISTER)n, 1, config->T3 | config->T4);
     // Set loop begin/end time and high part of loop times.
-    WritePagedReg(n + 2, config->Tend | config->Tbegin | ((config->Times >> 8) & 0x0F));
+    WritePagedReg((PAGEDREGISTER)n, 2, config->Tend | config->Tbegin | ((config->Times >> 8) & 0x0F));
     // Set low part of loop times.
-    WritePagedReg(n + 3, config->Times & 0xFF);
+    WritePagedReg((PAGEDREGISTER)n, 3, config->Times & 0xFF);
   }
 
   void IS31FL3733Driver::StartABM()
   {
     // Clear B_EN bit in configuration register.
-    WritePagedReg(REGISTERS::CR, CR_OPTIONS::CR_SSD);
+    WritePagedReg(PAGEDREGISTER::CR, CR_OPTIONS::CR_SSD);
     // Set B_EN bit in configuration register.
-    WritePagedReg(REGISTERS::CR, CR_OPTIONS::CR_BEN | CR_OPTIONS::CR_SSD);
+    WritePagedReg(PAGEDREGISTER::CR, CR_OPTIONS::CR_BEN | CR_OPTIONS::CR_SSD);
     // Write 0x00 to Time Update Register to update ABM settings.
-    WritePagedReg(REGISTERS::TUR, 0x00);
+    WritePagedReg(PAGEDREGISTER::TUR, 0x00);
   }
 #endif
 }

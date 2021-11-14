@@ -13,13 +13,19 @@ namespace IS31FL3733
   const uint8_t CS_LINES = 16; ///< Number of CS lines on the chip.
   const uint8_t SW_LINES = 12; ///< Number of SW lines on the chip.
 
-  /// @brief Addresses for all the registers.
-  enum REGISTERS
+  /// @brief Addresses for the common registers.
+  enum COMMONREGISTER
   {
-    PSR = 0x00FD,      ///< Common: page select register. Write only.
-    PSWL = 0x00FE,     ///< Common: page select register write lock. Read/write.
-    IMR = 0x00F0,      ///< Common: interrupt mask register. Write only.
-    ISR = 0x00F1,      ///< Common: interrupt status register. Read only.
+    PSR = 0xFD,  ///< Common: page select register. Write only.
+    PSWL = 0xFE, ///< Common: page select register write lock. Read/write.
+    IMR = 0xF0,  ///< Common: interrupt mask register. Write only.
+    ISR = 0xF1,  ///< Common: interrupt status register. Read only.
+  };
+
+  /// @brief Addresses for the paged registers. The high byte is the page
+  /// for the register. The low byte is the register address.
+  enum PAGEDREGISTER
+  {
     LEDONOFF = 0x0000, ///< Page 0: On or off state control for each LED. Write only.
     LEDOPEN = 0x0018,  ///< Page 0: Open state for each LED. Read only.
     LEDSHORT = 0x0030, ///< Page 0: Short state for each LED. Read only.
@@ -203,9 +209,9 @@ namespace IS31FL3733
   /// @brief ABM function number, also used as register offset.
   enum ABM_NUM
   {
-    NUM_1 = REGISTERS::ABM1CR,
-    NUM_2 = REGISTERS::ABM2CR,
-    NUM_3 = REGISTERS::ABM3CR
+    NUM_1 = PAGEDREGISTER::ABM1CR,
+    NUM_2 = PAGEDREGISTER::ABM2CR,
+    NUM_3 = PAGEDREGISTER::ABM3CR
   };
 
   /// @brief Structure for providing ABM configuration options.
@@ -251,30 +257,50 @@ namespace IS31FL3733
     byte GetI2CAddress();
 
     /// @brief Read from common register.
-    /// @param reg_addr The common register to read from.
-    uint8_t ReadCommonReg(uint8_t reg_addr);
+    /// @param reg The common register to read from.
+    uint8_t ReadCommonReg(COMMONREGISTER reg);
 
     /// @brief Write to common register.
-    void WriteCommonReg(uint8_t reg_addr, uint8_t reg_value);
+    /// @param reg The common register to write to.
+    /// @param reg_value The value to write.
+    void WriteCommonReg(COMMONREGISTER reg, uint8_t reg_value);
 
     /// @brief Select the associated page given a register.
-    /// @param reg_addr The register to activate the page for.
-    void SelectPageForRegister(uint16_t reg_addr);
+    /// @param reg The register to activate the page for.
+    void SelectPageForRegister(PAGEDREGISTER reg);
 
     /// @brief Read from paged register.
-    /// @param reg_addr The paged register to read from.
-    uint8_t ReadPagedReg(uint16_t reg_addr);
+    /// @param reg The paged register to read from.
+    uint8_t ReadPagedReg(PAGEDREGISTER reg);
+
+    /// @brief Read from paged register.
+    /// @param reg The paged register to read from.
+    /// @param offset The offset in the paged register to read from.
+    uint8_t ReadPagedReg(PAGEDREGISTER reg, uint8_t offset);
 
     /// @brief Write to paged register.
-    /// @param reg_addr The paged register to write to.
+    /// @param reg The paged register to write to.
     /// @param reg_value The value to write.
-    void WritePagedReg(uint16_t reg_addr, uint8_t reg_value);
+    void WritePagedReg(PAGEDREGISTER reg, uint8_t reg_value);
+
+    /// @brief Write to paged register.
+    /// @param reg The paged register to write to.
+    /// @param offset The offset in the paged register to write to.
+    /// @param reg_value The value to write.
+    void WritePagedReg(PAGEDREGISTER reg, uint8_t offset, uint8_t reg_value);
 
     /// @brief Write array to sequentially allocated paged registers starting from specified address.
-    /// @param reg_adder The paged register to write to.
+    /// @param reg The paged register to write to.
     /// @param values The array of values to write.
     /// @param count The number of values in the array.
-    void WritePagedRegs(uint16_t reg_addr, uint8_t *values, uint8_t count);
+    void WritePagedRegs(PAGEDREGISTER reg, uint8_t *values, uint8_t count);
+
+    /// @brief Write array to sequentially allocated paged registers starting from specified address.
+    /// @param reg The paged register to write to.
+    /// @param reg The offset in the paged register to write to.
+    /// @param values The array of values to write.
+    /// @param count The number of values in the array.
+    void WritePagedRegs(PAGEDREGISTER reg, uint8_t offset, uint8_t *values, uint8_t count);
 
     /// @brief Initialize the IS31FL3733 chip.
     void Init();
