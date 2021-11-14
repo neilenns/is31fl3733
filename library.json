@@ -15,6 +15,7 @@
       "maintainer": true
     }
   ],
+  "license": "MIT",
   "homepage": "https://github.com/neilenns/is31fl3773",
   "frameworks": "*",
   "platforms": "*",
