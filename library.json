@@ -1,7 +1,7 @@
 {
-  "name": "IS31fl3733",
+  "name": "IS31fl3733Driver",
   "version": "1.0.0",
-  "description": "Provides methods to control the ISSI IS31fl3733 12x16 LED matrix driver chip.",
+  "description": "Provides a C++ class to control the ISSI IS31fl3733 12x16 LED matrix driver chip.",
   "keywords": "IS31fl3733, ISSI, LED matrix",
   "repository": {
     "type": "git",
@@ -23,7 +23,7 @@
   },
   "examples": [
     {
-      "name": "Turn on all LEDs",
+      "name": "Turn on all LEDs with ABM mode",
       "base": "src/",
       "files": ["main.cpp"]
     }
