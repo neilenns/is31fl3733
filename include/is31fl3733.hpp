@@ -331,11 +331,18 @@ namespace IS31FL3733
 
 // ABM functions
 #ifdef ENABLE_ABM
-    /// Set LED operating mode: PWM/ABM1,2,3. Could be set ALL / CS / SW.
+    /// @brief Sets the LED operating mode for an LED.
+    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
+    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @param value The LED_MODE to set.
     void SetLEDMode(uint8_t cs, uint8_t sw, LED_MODE mode);
-    /// Configure ABM Mode.
+
+    /// @brief Configures the ABM mode options.
+    /// @param n The ABM to configure.
+    /// @param config The configuration to set.
     void ConfigABM(ABM_NUM n, ABM_CONFIG *config);
-    /// Start ABM operation.
+
+    /// @brief Starts ABM operation.
     void StartABM();
 #endif
   };
