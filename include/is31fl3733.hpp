@@ -262,35 +262,71 @@ namespace IS31FL3733
     /// @return byte The 7-bit I2C address.
     byte GetI2CAddress();
 
-    /// Read from common register.
+    /// @brief Read from common register.
+    /// @param reg_addr The common register to read from.
     uint8_t ReadCommonReg(uint8_t reg_addr);
-    /// Write to common register.
+
+    /// @brief Write to common register.
     void WriteCommonReg(uint8_t reg_addr, uint8_t reg_value);
-    /// Select active page.
+
+    /// @brief Select the associated page given a register.
+    /// @param reg_addr The register to activate the page for.
     void SelectPageForRegister(uint16_t reg_addr);
-    /// Read from paged register.
+
+    /// @brief Read from paged register.
+    /// @param reg_addr The paged register to read from.
     uint8_t ReadPagedReg(uint16_t reg_addr);
-    /// Write to paged register.
+
+    /// @brief Write to paged register.
+    /// @param reg_addr The paged register to write to.
+    /// @param reg_value The value to write.
     void WritePagedReg(uint16_t reg_addr, uint8_t reg_value);
-    /// Write array to sequentially allocated paged registers starting from specified address.
+
+    /// @brief Write array to sequentially allocated paged registers starting from specified address.
+    /// @param reg_adder The paged register to write to.
+    /// @param values The array of values to write.
+    /// @param count The number of values in the array.
     void WritePagedRegs(uint16_t reg_addr, uint8_t *values, uint8_t count);
-    /// Initialize IS31FL3733 for PWM operation.
+
+    /// @brief Initialize the IS31FL3733 chip.
     void Init();
-    /// Set global current control register.
+
+    /// @brief Set global current control register.
+    /// @param gcc The current control value to set.
     void SetGCC(uint8_t gcc);
-    /// Set SW Pull-Up register.
+
+    /// @brief Set the SW pull-up register.
+    /// @param resistor The value of the pull-up resistor to use.
     void SetSWPUR(RESISTOR resistor);
-    /// Set CS Pull-Down register.
+
+    /// @brief Set the CS pull-down register.
+    /// @param resistor The value of the pull-down resistor to use.
     void SetCSPDR(RESISTOR resistor);
-    /// Set LED state: ON/OFF. Could be set ALL / CS / SW.
+
+    /// @brief Set LED state to either ON or OFF.
+    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
+    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @param state The LED_STATE to set the LED to.
     void SetLEDState(uint8_t cs, uint8_t sw, LED_STATE state);
-    /// Set LED PWM duty value. Could be set ALL / CS / SW.
+
+    /// @brief Set the LED PWM duty value.
+    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
+    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @param value The PWM duty cycle to set the LED to.
     void SetLEDPWM(uint8_t cs, uint8_t sw, uint8_t value);
-    /// Get status of LED.
+
+    /// @brief Get the status of an LED.
+    /// @param CS The LED's column position.
+    /// @param SW THe LED's row position.
+    /// @returns The status of the LED.
     LED_STATUS GetLEDStatus(uint8_t cs, uint8_t sw);
-    /// Set LED state for all LED's from buffer.
+
+    /// @brief Set the LED state for all LED's from buffer.
+    /// @param states An array of LED states for all 192 LEDs.
     void SetState(uint8_t *states);
-    /// SET LED PWM duty value for all LED's from buffer.
+
+    /// @brief Set the LED PWN values for all LED's from buffer.
+    /// @param states An array of PWM values for all 192 LEDs.
     void SetPWM(uint8_t *values);
 
 // ABM functions
