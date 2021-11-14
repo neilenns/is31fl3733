@@ -19,6 +19,13 @@
   "frameworks": "*",
   "platforms": "*",
   "export": {
-    "include": ["src/*.cpp", "include/*.hpp"]
-  }
+    "include": ["src/is31fl3733.cpp", "include/is31fl3733.hpp"]
+  },
+  "examples": [
+    {
+      "name": "Turn on all LEDs",
+      "base": "src/",
+      "files": ["main.cpp"]
+    }
+  ]
 }
