@@ -1,4 +1,4 @@
-# IS31FL3733 C library
+# IS31FL3733 C++ library
 
 This library originally forked from [the C library written by kkostyan](https://github.com/kkostyan/is31fl3733).
 It is functionally equivalent to the C library but updated to use C++, including namespaces, enums, and constants
