@@ -113,7 +113,6 @@ namespace IS31FL3733
 // ****************************************************************
 // Start ABM support
 #ifdef ENABLE_ABM
-
   /// @brief Maximum number of ABM loop times.
   const int ABM_LOOP_TIMES_MAX = 0x0FFF;
 
@@ -208,17 +207,6 @@ namespace IS31FL3733
     NUM_2 = REGISTERS::ABM2CR,
     NUM_3 = REGISTERS::ABM3CR
   };
-
-  /** Auto Breath Mode (ABM) configuration structure.
-  *      +----+              +
-  *     /      \            / 
-  *    /        \          /  
-  *   /          \        /   
-  *  /            \      /    
-  * +              +----+     
-  * | T1 | T2 | T3 | T4 | T1 |
-  *
-  */
 
   /// @brief Structure for providing ABM configuration options.
   struct ABM_CONFIG
