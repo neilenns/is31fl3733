@@ -69,23 +69,23 @@ void setup()
   Serial.println("Turning on all LEDs");
   driver.SetLEDState(CS_LINES, SW_LINES, LED_STATE::ON);
 
-  // Serial.println("Configure all LEDs for ABM1");
-  // driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
+  Serial.println("Configure all LEDs for ABM1");
+  driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
 
-  // ABM_CONFIG ABM1;
+  ABM_CONFIG ABM1;
 
-  // ABM1.T1 = ABM_T1::T1_840MS;
-  // ABM1.T2 = ABM_T2::T2_840MS;
-  // ABM1.T3 = ABM_T3::T3_840MS;
-  // ABM1.T4 = ABM_T4::T4_840MS;
-  // ABM1.Tbegin = ABM_LOOP_BEGIN::LOOP_BEGIN_T4;
-  // ABM1.Tend = ABM_LOOP_END::LOOP_END_T3;
-  // ABM1.Times = ABM_LOOP_FOREVER;
+  ABM1.T1 = ABM_T1::T1_840MS;
+  ABM1.T2 = ABM_T2::T2_840MS;
+  ABM1.T3 = ABM_T3::T3_840MS;
+  ABM1.T4 = ABM_T4::T4_840MS;
+  ABM1.Tbegin = ABM_LOOP_BEGIN::LOOP_BEGIN_T4;
+  ABM1.Tend = ABM_LOOP_END::LOOP_END_T3;
+  ABM1.Times = ABM_LOOP_FOREVER;
 
-  // // Write ABM structure parameters to device registers.
-  // driver.ConfigABM(ABM_NUM::NUM_1, &ABM1);
-  // // Start ABM mode operation.
-  // driver.StartABM();
+  // Write ABM structure parameters to device registers.
+  driver.ConfigABM(ABM_NUM::NUM_1, &ABM1);
+  // Start ABM mode operation.
+  driver.StartABM();
 }
 
 void loop()
