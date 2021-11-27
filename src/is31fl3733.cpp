@@ -2,7 +2,7 @@
 
 namespace IS31FL3733
 {
-  IS31FL3733Driver::IS31FL3733Driver(ADDR addr1, ADDR addr2, i2c_read_function read_function, i2c_write_function write_function)
+  IS31FL3733Driver::IS31FL3733Driver(const ADDR addr1, const ADDR addr2,const i2c_read_function read_function,const i2c_write_function write_function)
   {
 #ifdef ARDUINO
     // Arduino uses 7 bit I2C addresses without the R/W bit in position 0.

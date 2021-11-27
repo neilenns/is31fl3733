@@ -244,7 +244,7 @@ namespace IS31FL3733
     /// @param addr2 The ADDR2 pin connection. Must be a value from the ADDR enum.
     /// @param read_function Pointer to the I2C read function. Must implement an i2c_function.
     /// @param write_function Pointer to the I2C write function. Must implement an i2c_function.
-    IS31FL3733Driver(ADDR addr1, ADDR addr2, i2c_read_function read_function, i2c_write_function write_function);
+    IS31FL3733Driver(const ADDR addr1, const ADDR addr2, const i2c_read_function read_function, const i2c_write_function write_function);
 
     /// @brief Gets the I2C address for the IS31FL3733.
     /// @return byte The 7-bit I2C address.
