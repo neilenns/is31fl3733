@@ -239,12 +239,8 @@ namespace IS31FL3733
 
   void IS31FL3733Driver::SetLEDSinglePWM(uint8_t cs, uint8_t sw, const uint8_t value)
   {
-    uint8_t offset;
-
-    // Calculate LED offset.
-    offset = sw * CS_LINES + cs;
     // Write LED PWM value to device register.
-    WritePagedReg(PAGEDREGISTER::LEDPWM, offset, value);
+    WritePagedReg(PAGEDREGISTER::LEDPWM, sw * CS_LINES + cs, value);
   }
 
   void IS31FL3733Driver::SetLEDRowPWM(uint8_t sw, const uint8_t value)
@@ -351,63 +347,49 @@ namespace IS31FL3733
     WritePagedRegs(PAGEDREGISTER::LEDPWM, values, SW_LINES * CS_LINES);
   }
 
-  void IS31FL3733Driver::SetLEDMode(uint8_t cs, uint8_t sw, const LED_MODE mode)
+  void IS31FL3733Driver::SetLEDSingleMode(uint8_t cs, uint8_t sw, const LED_MODE mode)
+  {
+    WritePagedReg(PAGEDREGISTER::LEDABM, sw * CS_LINES + cs, mode);
+  }
+
+  void IS31FL3733Driver::SetLEDRowMode(const uint8_t sw, const LED_MODE mode)
+  {
+    uint8_t values[CS_LINES];
+
+    memset(values, mode, CS_LINES * sizeof(uint8_t));
+
+    // Write LED PWM value to device register.
+    WritePagedRegs(PAGEDREGISTER::LEDABM, sw * CS_LINES, values, CS_LINES);
+  }
+
+  void IS31FL3733Driver::SetLEDColumnMode(uint8_t cs, const LED_MODE mode)
   {
     uint8_t offset;
 
-    // Check SW boundaries.
-    if (sw < SW_LINES)
+    // Set PWM of full column selected by CS.
+    for (uint8_t row = 0; row < SW_LINES; row++)
     {
-      // Check CS boundaries.
-      if (cs < CS_LINES)
-      {
-        // Set mode of individual LED.
-        // Calculate LED offset.
-        offset = sw * CS_LINES + cs;
-        // Write LED mode to device register.
-        WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
-      }
-      else
-      {
-        // Set mode of full row selected by SW.
-        for (cs = 0; cs < CS_LINES; cs++)
-        {
-          // Calculate LED offset.
-          offset = sw * CS_LINES + cs;
-          // Write LED mode to device register.
-          WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
-        }
-      }
+      // Calculate LED offset.
+      offset = row * CS_LINES + cs;
+
+      // Write LED PWM value to device register.
+      WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
     }
-    else
-    {
-      // Check CS boundaries.
-      if (cs < CS_LINES)
-      {
-        // Set mode of full column selected by CS.
-        for (sw = 0; sw < SW_LINES; sw++)
-        {
-          // Calculate LED offset.
-          offset = sw * CS_LINES + cs;
-          // Write LED mode to device register.
-          WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
-        }
-      }
-      else
-      {
-        // Set mode of all LEDs.
-        for (sw = 0; sw < SW_LINES; sw++)
-        {
-          for (cs = 0; cs < CS_LINES; cs++)
-          {
-            // Calculate LED offset.
-            offset = sw * CS_LINES + cs;
-            // Write LED mode to device register.
-            WritePagedReg(PAGEDREGISTER::LEDABM, offset, mode);
-          }
-        }
-      }
-    }
+  }
+
+  void IS31FL3733Driver::SetLEDMatrixMode(const LED_MODE mode)
+  {
+    // On Arduino the maximum buffer size for an I2C write is 32 bytes so this is
+    // really wasting RAM on the Arduino. Ideally on Arduino this would only be 32
+    // bytes and would get sent repeatedly until LED_COUNT's worth of bytes are sent.
+    // The downside to that approach is this code is no longer portable across
+    // platforms. So instead this is the full amount of bytes that have to get sent
+    // and splitting it into appropriate chunks is left to WritePagedRegs().
+    uint8_t modes[LED_COUNT];
+
+    memset(modes, mode, LED_COUNT * sizeof(uint8_t));
+
+    WritePagedRegs(PAGEDREGISTER::LEDABM, modes, LED_COUNT);
   }
 
   void IS31FL3733Driver::ConfigABM(const ABM_NUM n, const ABM_CONFIG *config)

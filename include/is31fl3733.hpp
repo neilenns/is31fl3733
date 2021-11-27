@@ -365,11 +365,25 @@ namespace IS31FL3733
     /// @param states An array of PWM values for all 192 LEDs.
     void SetPWM(const uint8_t *values);
 
-    /// @brief Sets the LED operating mode for an LED.
-    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
-    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @brief Sets the LED operating mode for a single LED.
+    /// @param cs The LED's column position. Origin 0, for example pass 0 to control cs1.
+    /// @param sw The LED's row position. Origin 0, for example pass 0 to control sw1.
     /// @param value The LED_MODE to set.
-    void SetLEDMode(uint8_t cs, uint8_t sw, const LED_MODE mode);
+    void SetLEDSingleMode(uint8_t cs, uint8_t sw, const LED_MODE mode);
+
+    /// @brief Set the LED operating mode for all LEDs in a row.
+    /// @param sw The row to set. Origin 0, for example pass 0 to control sw1.
+    /// @param value The LED_MODE to set.
+    void SetLEDRowMode(const uint8_t sw, const LED_MODE mode);
+
+    /// @brief Set the LED operating mode for all LEDs in a column.
+    /// @param sw The column to set. Origin 0, for example pass 0 to control cs1.
+    /// @param value The LED_MODE to set.
+    void SetLEDColumnMode(const uint8_t cs, const LED_MODE mode);
+
+    /// @brief Set the LED operating mode for all LEDs in the matrix.
+    /// @param value The LED_MODE to set.
+    void SetLEDMatrixMode(const LED_MODE mode);
 
     /// @brief Configures the ABM mode options.
     /// @param n The ABM to configure.

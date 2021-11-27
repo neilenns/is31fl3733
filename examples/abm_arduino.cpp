@@ -132,23 +132,14 @@ void setup()
   Serial.println("Setting global current control to half");
   driver.SetGCC(127);
 
-  Serial.println("Setting PWM state for all LEDs to full power in 5 seconds...");
-  delay(5000);
-  driver.SetLEDMatrixPWM(255);
-  Serial.println("Done");
-  delay(5000);
-
-  Serial.println("Setting PWM state for all LEDs to half power in 5 seconds...");
-  delay(5000);
+  Serial.println("Setting PWM state for all LEDs to half power");
   driver.SetLEDMatrixPWM(128);
-  Serial.println("Done");
-  delay(5000);
 
   Serial.println("Turning on all LEDs");
   driver.SetLEDMatrixState(LED_STATE::ON);
 
   Serial.println("Configure all LEDs for ABM1");
-  driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
+  driver.SetLEDMatrixMode(LED_MODE::ABM1);
 
   ABM_CONFIG ABM1;
 
@@ -202,7 +193,7 @@ void loop()
     {
       Serial.println("ABM1 completed");
       Serial.println("Configure all LEDs for full on");
-      driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::PWM);
+      driver.SetLEDMatrixMode(LED_MODE::PWM);
 
       ledState = LedState::LEDOn;
     }
