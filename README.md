@@ -37,7 +37,7 @@ and take care of reading and writing data on the I2C bus.
 Example implementations for Arduino:
 
 ```C++
-uint8_t i2c_write_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
+uint8_t i2c_write_reg(uint8_t i2c_addr, uint8_t reg_addr, const uint8_t *buffer, uint8_t count)
 {
   Wire.beginTransmission(i2c_addr);
   Wire.write(reg_addr);
@@ -58,22 +58,6 @@ uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_
     buffer[i] = Wire.read();
   }
   return bytesRead;
-}
-```
-
-Example implementations for STM32:
-
-```C++
-I2C_HandleTypeDef hi2c1;
-
-uint8_t i2c_write_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
-{
-    return HAL_I2C_Mem_Write (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1000);
-}
-
-uint8_t i2c_read_reg (uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
-{
-    return HAL_I2C_Mem_Read (&hi2c1, i2c_addr, reg_addr, I2C_MEMADD_SIZE_8BIT, buffer, count, 1000);
 }
 ```
 
@@ -125,7 +109,7 @@ Also you can update all LEDs state and brightness from an array of values, e.g. 
 
 ```C++
 // 16x12 heart figure.
-const uint8_t heart[] = {
+constexpr uint8_t heart[] = {
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
     0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,0xff,0xff,0x00,0x00,0x00,0x00,
@@ -141,9 +125,9 @@ const uint8_t heart[] = {
 };
 
 // Set LED brightness for all LEDs from an array.
-driver.SetPWM ((uint8_t*)heart);
+driver.SetPWM (heart);
 // Turn on LEDs with non-zero brightness.
-driver.SetState ((uint8_t*)heart);
+driver.SetState(heart);
 ```
 
 ### Initializing ABM mode, setting parameters, and starting ABM
@@ -153,7 +137,7 @@ types of ABM:
 
 ```C++
 // Turn on LEDs for heart figure.
-driver.SetState ((uint8_t*)heart);
+driver.SetState(heart);
 // Configure all matrix LEDs to work in ABM1 mode.
 driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
 ```

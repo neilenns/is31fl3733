@@ -2,7 +2,7 @@
 
 namespace IS31FL3733
 {
-  IS31FL3733Driver::IS31FL3733Driver(ADDR addr1, ADDR addr2, i2c_function read_function, i2c_function write_function)
+  IS31FL3733Driver::IS31FL3733Driver(ADDR addr1, ADDR addr2, i2c_read_function read_function, i2c_write_function write_function)
   {
 #ifdef ARDUINO
     // Arduino uses 7 bit I2C addresses without the R/W bit in position 0.
@@ -15,7 +15,7 @@ namespace IS31FL3733
     i2c_write_reg = write_function;
   }
 
-  uint8_t IS31FL3733Driver::ReadCommonReg(COMMONREGISTER reg)
+  uint8_t IS31FL3733Driver::ReadCommonReg(const COMMONREGISTER reg)
   {
     uint8_t reg_value;
 
@@ -25,13 +25,13 @@ namespace IS31FL3733
     return reg_value;
   }
 
-  void IS31FL3733Driver::WriteCommonReg(COMMONREGISTER reg, uint8_t reg_value)
+  void IS31FL3733Driver::WriteCommonReg(const COMMONREGISTER reg, const uint8_t reg_value)
   {
     // Write value to register.
     i2c_write_reg(address, reg, &reg_value, sizeof(uint8_t));
   }
 
-  void IS31FL3733Driver::SelectPageForRegister(PAGEDREGISTER reg)
+  void IS31FL3733Driver::SelectPageForRegister(const PAGEDREGISTER reg)
   {
     // Unlock Command Register.
     WriteCommonReg(COMMONREGISTER::PSWL, PSWL_OPTIONS::PSWL_ENABLE);
@@ -40,12 +40,12 @@ namespace IS31FL3733
     WriteCommonReg(COMMONREGISTER::PSR, (uint8_t)(reg >> 8));
   }
 
-  uint8_t IS31FL3733Driver::ReadPagedReg(PAGEDREGISTER reg)
+  uint8_t IS31FL3733Driver::ReadPagedReg(const PAGEDREGISTER reg)
   {
     return ReadPagedReg(reg, 0);
   }
 
-  uint8_t IS31FL3733Driver::ReadPagedReg(PAGEDREGISTER reg, uint8_t offset)
+  uint8_t IS31FL3733Driver::ReadPagedReg(const PAGEDREGISTER reg, const uint8_t offset)
   {
     uint8_t reg_value;
 
@@ -58,12 +58,12 @@ namespace IS31FL3733
     return reg_value;
   }
 
-  void IS31FL3733Driver::WritePagedReg(PAGEDREGISTER reg, uint8_t reg_value)
+  void IS31FL3733Driver::WritePagedReg(const PAGEDREGISTER reg, const uint8_t reg_value)
   {
     WritePagedReg(reg, 0, reg_value);
   }
 
-  void IS31FL3733Driver::WritePagedReg(PAGEDREGISTER reg, uint8_t offset, uint8_t reg_value)
+  void IS31FL3733Driver::WritePagedReg(const PAGEDREGISTER reg, const uint8_t offset, const uint8_t reg_value)
   {
     // Select register page.
     SelectPageForRegister(reg);
@@ -72,12 +72,12 @@ namespace IS31FL3733
     i2c_write_reg(address, (uint8_t)(reg) + offset, &reg_value, sizeof(uint8_t));
   }
 
-  void IS31FL3733Driver::WritePagedRegs(PAGEDREGISTER reg, uint8_t *values, uint8_t count)
+  void IS31FL3733Driver::WritePagedRegs(const PAGEDREGISTER reg, const uint8_t *values, const uint8_t count)
   {
     WritePagedRegs(reg, 0, values, count);
   }
 
-  void IS31FL3733Driver::WritePagedRegs(PAGEDREGISTER reg, uint8_t offset, uint8_t *values, uint8_t count)
+  void IS31FL3733Driver::WritePagedRegs(const PAGEDREGISTER reg, const uint8_t offset, const uint8_t *values, const uint8_t count)
   {
     // Select registers page.
     SelectPageForRegister(reg);
@@ -101,25 +101,25 @@ namespace IS31FL3733
     return address;
   }
 
-  void IS31FL3733Driver::SetGCC(uint8_t gcc)
+  void IS31FL3733Driver::SetGCC(const uint8_t gcc)
   {
     // Write gcc value to Global Current Control (GCC) register.
     WritePagedReg(PAGEDREGISTER::GCC, gcc);
   }
 
-  void IS31FL3733Driver::SetSWPUR(RESISTOR resistor)
+  void IS31FL3733Driver::SetSWPUR(const RESISTOR resistor)
   {
     // Write resistor value to SWPUR register.
     WritePagedReg(PAGEDREGISTER::SWPUR, resistor);
   }
 
-  void IS31FL3733Driver::SetCSPDR(RESISTOR resistor)
+  void IS31FL3733Driver::SetCSPDR(const RESISTOR resistor)
   {
     // Write resistor value to CSPDR register.
     WritePagedReg(PAGEDREGISTER::CSPDR, resistor);
   }
 
-  void IS31FL3733Driver::SetLEDState(uint8_t cs, uint8_t sw, LED_STATE state)
+  void IS31FL3733Driver::SetLEDState(uint8_t cs, uint8_t sw, const LED_STATE state)
   {
     uint8_t offset;
 
@@ -218,7 +218,7 @@ namespace IS31FL3733
     }
   }
 
-  void IS31FL3733Driver::SetLEDPWM(uint8_t cs, uint8_t sw, uint8_t value)
+  void IS31FL3733Driver::SetLEDPWM(uint8_t cs, uint8_t sw, const uint8_t value)
   {
     uint8_t offset;
 
@@ -305,7 +305,7 @@ namespace IS31FL3733
     return LED_STATUS::NORMAL;
   }
 
-  void IS31FL3733Driver::SetState(uint8_t *states)
+  void IS31FL3733Driver::SetState(const uint8_t *states)
   {
     uint8_t sw;
     uint8_t cs;
@@ -335,13 +335,13 @@ namespace IS31FL3733
     WritePagedRegs(PAGEDREGISTER::LEDONOFF, leds, SW_LINES * CS_LINES / 8);
   }
 
-  void IS31FL3733Driver::SetPWM(uint8_t *values)
+  void IS31FL3733Driver::SetPWM(const uint8_t *values)
   {
     // Write LED PWM values to device registers.
     WritePagedRegs(PAGEDREGISTER::LEDPWM, values, SW_LINES * CS_LINES);
   }
 
-  void IS31FL3733Driver::SetLEDMode(uint8_t cs, uint8_t sw, LED_MODE mode)
+  void IS31FL3733Driver::SetLEDMode(uint8_t cs, uint8_t sw, const LED_MODE mode)
   {
     uint8_t offset;
 
@@ -400,7 +400,7 @@ namespace IS31FL3733
     }
   }
 
-  void IS31FL3733Driver::ConfigABM(ABM_NUM n, ABM_CONFIG *config)
+  void IS31FL3733Driver::ConfigABM(const ABM_NUM n, const ABM_CONFIG *config)
   {
     // Set fade in and fade out time.
     WritePagedReg((PAGEDREGISTER)n, config->T1 | config->T2);
