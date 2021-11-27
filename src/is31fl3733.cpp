@@ -21,6 +21,21 @@ namespace IS31FL3733
     i2c_write_reg = write_function;
   }
 
+  void IS31FL3733Driver::_setFullPagedRegister(const PAGEDREGISTER reg, uint8_t value)
+  {
+    // On Arduino the maximum buffer size for an I2C write is 32 bytes so this is
+    // really wasting RAM on the Arduino. Ideally on Arduino this would only be 32
+    // bytes and would get sent repeatedly until LED_COUNT's worth of bytes are sent.
+    // The downside to that approach is this code is no longer portable across
+    // platforms. So instead this is the full amount of bytes that have to get sent
+    // and splitting it into appropriate chunks is left to WritePagedRegs().
+    uint8_t values[LED_COUNT];
+
+    memset(values, value, LED_COUNT * sizeof(uint8_t));
+
+    WritePagedRegs(reg, values, LED_COUNT);
+  }
+
   uint8_t IS31FL3733Driver::ReadCommonReg(const COMMONREGISTER reg)
   {
     uint8_t reg_value;
@@ -270,17 +285,7 @@ namespace IS31FL3733
 
   void IS31FL3733Driver::SetLEDMatrixPWM(const uint8_t value)
   {
-    // On Arduino the maximum buffer size for an I2C write is 32 bytes so this is
-    // really wasting RAM on the Arduino. Ideally on Arduino this would only be 32
-    // bytes and would get sent repeatedly until LED_COUNT's worth of bytes are sent.
-    // The downside to that approach is this code is no longer portable across
-    // platforms. So instead this is the full amount of bytes that have to get sent
-    // and splitting it into appropriate chunks is left to WritePagedRegs().
-    uint8_t values[LED_COUNT];
-
-    memset(values, value, LED_COUNT * sizeof(uint8_t));
-
-    WritePagedRegs(PAGEDREGISTER::LEDPWM, values, LED_COUNT);
+    _setFullPagedRegister(PAGEDREGISTER::LEDPWM, value);
   }
 
   LED_STATUS IS31FL3733Driver::GetLEDStatus(uint8_t cs, uint8_t sw)
@@ -379,17 +384,7 @@ namespace IS31FL3733
 
   void IS31FL3733Driver::SetLEDMatrixMode(const LED_MODE mode)
   {
-    // On Arduino the maximum buffer size for an I2C write is 32 bytes so this is
-    // really wasting RAM on the Arduino. Ideally on Arduino this would only be 32
-    // bytes and would get sent repeatedly until LED_COUNT's worth of bytes are sent.
-    // The downside to that approach is this code is no longer portable across
-    // platforms. So instead this is the full amount of bytes that have to get sent
-    // and splitting it into appropriate chunks is left to WritePagedRegs().
-    uint8_t modes[LED_COUNT];
-
-    memset(modes, mode, LED_COUNT * sizeof(uint8_t));
-
-    WritePagedRegs(PAGEDREGISTER::LEDABM, modes, LED_COUNT);
+    _setFullPagedRegister(PAGEDREGISTER::LEDABM, mode);
   }
 
   void IS31FL3733Driver::ConfigABM(const ABM_NUM n, const ABM_CONFIG *config)

@@ -238,6 +238,11 @@ namespace IS31FL3733
     i2c_write_function i2c_write_reg;      ///< Pointer to the i2C write register function.
     uint8_t leds[SW_LINES * CS_LINES / 8]; ///< State of individual LEDs. Bitmask that can't be read back from IS31FL3733.
 
+    /// @brief Writes every byte in the specified paged register with the specified value.
+    /// @param reg The register to write to.
+    /// @param value The value to write.
+    void _setFullPagedRegister(const PAGEDREGISTER reg, const uint8_t value);
+
   public:
     /// @brief Construct a new IS31FL3733 object
     /// @param addr1 The ADDR1 pin connection. Must be a value from the ADDR enum.
