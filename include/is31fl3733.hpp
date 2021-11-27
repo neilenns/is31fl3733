@@ -224,8 +224,8 @@ namespace IS31FL3733
   };
 
   /// @brief Function definition for reading and writing the registers.
-  typedef uint8_t (*i2c_read_function)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
-  typedef uint8_t (*i2c_write_function)(uint8_t i2c_addr, uint8_t reg_addr, const uint8_t *buffer, uint8_t count);
+  typedef uint8_t (*i2c_read_function)(const uint8_t i2c_addr, const uint8_t reg_addr, uint8_t *buffer, const uint8_t count);
+  typedef uint8_t (*i2c_write_function)(const uint8_t i2c_addr, const uint8_t reg_addr, const uint8_t *buffer, const uint8_t count);
 
   /// @brief Driver for interacting with IS31FL3733 chips.
   class IS31FL3733Driver
