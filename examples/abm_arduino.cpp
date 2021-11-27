@@ -9,6 +9,7 @@
  * @copyright Copyright (c) 2021
  * 
  */
+
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -22,9 +23,8 @@ const uint8_t SDB_PIN = 4;
 const uint8_t INTB_PIN = 7;
 
 // Function prototypes for the read and write functions defined later in the file.
-uint8_t
-i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t length);
-uint8_t i2c_write_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
+uint8_t i2c_read_reg(const uint8_t i2c_addr, const uint8_t reg_addr, uint8_t *buffer, const uint8_t length);
+uint8_t i2c_write_reg(const uint8_t i2c_addr, const uint8_t reg_addr, const uint8_t *buffer, const uint8_t count);
 
 // Create a new driver with the address pins tied to ground, and provide the I2C read and write
 // functions.
@@ -57,7 +57,7 @@ volatile auto ledState = LedState::ABMNotStarted;
  * @param length Length of the buffer.
  * @return uint8_t 
  */
-uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t length)
+uint8_t i2c_read_reg(const uint8_t i2c_addr, const uint8_t reg_addr, uint8_t *buffer, const uint8_t length)
 {
   Wire.beginTransmission(i2c_addr);
   Wire.write(reg_addr);
@@ -79,7 +79,7 @@ uint8_t i2c_read_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_
  * @param count Number of bytes in the buffer.
  * @return uint8_t The number of bytes written.
  */
-uint8_t i2c_write_reg(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count)
+uint8_t i2c_write_reg(const uint8_t i2c_addr, const uint8_t reg_addr, const uint8_t *buffer, const uint8_t count)
 {
   Wire.beginTransmission(i2c_addr);
   Wire.write(reg_addr);

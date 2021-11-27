@@ -224,7 +224,8 @@ namespace IS31FL3733
   };
 
   /// @brief Function definition for reading and writing the registers.
-  typedef uint8_t (*i2c_function)(uint8_t i2c_addr, uint8_t reg_addr, uint8_t *buffer, uint8_t count);
+  typedef uint8_t (*i2c_read_function)(const uint8_t i2c_addr, const uint8_t reg_addr, uint8_t *buffer, const uint8_t count);
+  typedef uint8_t (*i2c_write_function)(const uint8_t i2c_addr, const uint8_t reg_addr, const uint8_t *buffer, const uint8_t count);
 
   /// @brief Driver for interacting with IS31FL3733 chips.
   class IS31FL3733Driver
@@ -233,8 +234,8 @@ namespace IS31FL3733
     const uint8_t I2C_BASE_ADDR = 0xA0; ///< Base I2C address of the chip.
 
     uint8_t address;                       ///< Address on I2C bus.
-    i2c_function i2c_read_reg;             ///< Pointer to I2C read register function.
-    i2c_function i2c_write_reg;            ///< Pointer to the i2C write register function.
+    i2c_read_function i2c_read_reg;        ///< Pointer to I2C read register function.
+    i2c_write_function i2c_write_reg;      ///< Pointer to the i2C write register function.
     uint8_t leds[SW_LINES * CS_LINES / 8]; ///< State of individual LEDs. Bitmask that can't be read back from IS31FL3733.
 
   public:
@@ -243,7 +244,7 @@ namespace IS31FL3733
     /// @param addr2 The ADDR2 pin connection. Must be a value from the ADDR enum.
     /// @param read_function Pointer to the I2C read function. Must implement an i2c_function.
     /// @param write_function Pointer to the I2C write function. Must implement an i2c_function.
-    IS31FL3733Driver(ADDR addr1, ADDR addr2, i2c_function read_function, i2c_function write_function);
+    IS31FL3733Driver(const ADDR addr1, const ADDR addr2, const i2c_read_function read_function, const i2c_write_function write_function);
 
     /// @brief Gets the I2C address for the IS31FL3733.
     /// @return byte The 7-bit I2C address.
@@ -251,101 +252,101 @@ namespace IS31FL3733
 
     /// @brief Read from common register.
     /// @param reg The common register to read from.
-    uint8_t ReadCommonReg(COMMONREGISTER reg);
+    uint8_t ReadCommonReg(const COMMONREGISTER reg);
 
     /// @brief Write to common register.
     /// @param reg The common register to write to.
     /// @param reg_value The value to write.
-    void WriteCommonReg(COMMONREGISTER reg, uint8_t reg_value);
+    void WriteCommonReg(const COMMONREGISTER reg, const uint8_t reg_value);
 
     /// @brief Select the associated page given a register.
     /// @param reg The register to activate the page for.
-    void SelectPageForRegister(PAGEDREGISTER reg);
+    void SelectPageForRegister(const PAGEDREGISTER reg);
 
     /// @brief Read from paged register.
     /// @param reg The paged register to read from.
-    uint8_t ReadPagedReg(PAGEDREGISTER reg);
+    uint8_t ReadPagedReg(const PAGEDREGISTER reg);
 
     /// @brief Read from paged register.
     /// @param reg The paged register to read from.
     /// @param offset The offset in the paged register to read from.
-    uint8_t ReadPagedReg(PAGEDREGISTER reg, uint8_t offset);
+    uint8_t ReadPagedReg(const PAGEDREGISTER reg, const uint8_t offset);
 
     /// @brief Write to paged register.
     /// @param reg The paged register to write to.
     /// @param reg_value The value to write.
-    void WritePagedReg(PAGEDREGISTER reg, uint8_t reg_value);
+    void WritePagedReg(const PAGEDREGISTER reg, const uint8_t reg_value);
 
     /// @brief Write to paged register.
     /// @param reg The paged register to write to.
     /// @param offset The offset in the paged register to write to.
     /// @param reg_value The value to write.
-    void WritePagedReg(PAGEDREGISTER reg, uint8_t offset, uint8_t reg_value);
+    void WritePagedReg(const PAGEDREGISTER reg, const uint8_t offset, const uint8_t reg_value);
 
     /// @brief Write array to sequentially allocated paged registers starting from specified address.
     /// @param reg The paged register to write to.
     /// @param values The array of values to write.
     /// @param count The number of values in the array.
-    void WritePagedRegs(PAGEDREGISTER reg, uint8_t *values, uint8_t count);
+    void WritePagedRegs(const PAGEDREGISTER reg, const uint8_t *values, const uint8_t count);
 
     /// @brief Write array to sequentially allocated paged registers starting from specified address.
     /// @param reg The paged register to write to.
     /// @param reg The offset in the paged register to write to.
     /// @param values The array of values to write.
     /// @param count The number of values in the array.
-    void WritePagedRegs(PAGEDREGISTER reg, uint8_t offset, uint8_t *values, uint8_t count);
+    void WritePagedRegs(const PAGEDREGISTER reg, const uint8_t offset, const uint8_t *values, const uint8_t count);
 
     /// @brief Initialize the IS31FL3733 chip.
     void Init();
 
     /// @brief Set global current control register.
     /// @param gcc The current control value to set.
-    void SetGCC(uint8_t gcc);
+    void SetGCC(const uint8_t gcc);
 
     /// @brief Set the SW pull-up register.
     /// @param resistor The value of the pull-up resistor to use.
-    void SetSWPUR(RESISTOR resistor);
+    void SetSWPUR(const RESISTOR resistor);
 
     /// @brief Set the CS pull-down register.
     /// @param resistor The value of the pull-down resistor to use.
-    void SetCSPDR(RESISTOR resistor);
+    void SetCSPDR(const RESISTOR resistor);
 
     /// @brief Set LED state to either ON or OFF.
     /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
     /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
     /// @param state The LED_STATE to set the LED to.
-    void SetLEDState(uint8_t cs, uint8_t sw, LED_STATE state);
+    void SetLEDState(uint8_t cs, uint8_t sw, const LED_STATE state);
 
     /// @brief Set the LED PWM duty value.
     /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
     /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
     /// @param value The PWM duty cycle to set the LED to.
-    void SetLEDPWM(uint8_t cs, uint8_t sw, uint8_t value);
+    void SetLEDPWM(uint8_t cs, uint8_t sw, const uint8_t value);
 
     /// @brief Get the status of an LED.
     /// @param CS The LED's column position.
     /// @param SW THe LED's row position.
     /// @returns The status of the LED.
-    LED_STATUS GetLEDStatus(uint8_t cs, uint8_t sw);
+    LED_STATUS GetLEDStatus(const uint8_t cs, const uint8_t sw);
 
     /// @brief Set the LED state for all LED's from buffer.
     /// @param states An array of LED states for all 192 LEDs.
-    void SetState(uint8_t *states);
+    void SetState(const uint8_t *states);
 
     /// @brief Set the LED PWN values for all LED's from buffer.
     /// @param states An array of PWM values for all 192 LEDs.
-    void SetPWM(uint8_t *values);
+    void SetPWM(const uint8_t *values);
 
     /// @brief Sets the LED operating mode for an LED.
     /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
     /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
     /// @param value The LED_MODE to set.
-    void SetLEDMode(uint8_t cs, uint8_t sw, LED_MODE mode);
+    void SetLEDMode(uint8_t cs, uint8_t sw, const LED_MODE mode);
 
     /// @brief Configures the ABM mode options.
     /// @param n The ABM to configure.
     /// @param config The configuration to set.
-    void ConfigABM(ABM_NUM n, ABM_CONFIG *config);
+    void ConfigABM(const ABM_NUM n, const ABM_CONFIG *config);
 
     /// @brief Starts ABM operation.
     void StartABM();
