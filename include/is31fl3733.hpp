@@ -255,6 +255,12 @@ namespace IS31FL3733
     /// @param value The value to write.
     void _setRowPagedRegister(const PAGEDREGISTER reg, const uint8_t sw, uint8_t value);
 
+    /// @brief Sets the state of an LED in a single byte of the led array.
+    /// @param offset The position in the array for the LED byte.
+    /// @param cs The LED's column position. Origin 0, for example pass 0 to control cs1.
+    /// @param state The LED_STATE to set the LED to.
+    void _setLEDState(const uint8_t offset, const uint8_t cs, const LED_STATE state);
+
   public:
     /// @brief Construct a new IS31FL3733 object
     /// @param addr1 The ADDR1 pin connection. Must be a value from the ADDR enum.

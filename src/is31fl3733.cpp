@@ -23,6 +23,21 @@ namespace IS31FL3733
     i2c_write_reg = write_function;
   }
 
+  void IS31FL3733Driver::_setLEDState(const uint8_t offset, const uint8_t cs, const LED_STATE state)
+  {
+    // Update state of LED in internal buffer.
+    if (state == LED_STATE::OFF)
+    {
+      // Clear bit for selected LED.
+      leds[offset] &= ~(0x01 << (cs % 8));
+    }
+    else
+    {
+      // Set bit for selected LED.
+      leds[offset] |= 0x01 << (cs % 8);
+    }
+  }
+
   void IS31FL3733Driver::_setColumnPagedRegister(const PAGEDREGISTER reg, const uint8_t cs, uint8_t value)
   {
     uint8_t offset;
@@ -186,17 +201,7 @@ namespace IS31FL3733
     // Calculate LED bit offset.
     offset = (sw << 1) + (cs / 8);
 
-    // Update state of LED in internal buffer.
-    if (state == LED_STATE::OFF)
-    {
-      // Clear bit for selected LED.
-      leds[offset] &= ~(0x01 << (cs % 8));
-    }
-    else
-    {
-      // Set bit for selected LED.
-      leds[offset] |= 0x01 << (cs % 8);
-    }
+    _setLEDState(offset, cs, state);
 
     WritePagedReg(PAGEDREGISTER::LEDONOFF, offset, leds[offset]);
   }
@@ -232,17 +237,7 @@ namespace IS31FL3733
       // Calculate LED bit offset.
       offset = (row << 1) + (cs / 8);
 
-      // Update state of LED in internal buffer.
-      if (state == LED_STATE::OFF)
-      {
-        // Clear bit for selected LED.
-        leds[offset] &= ~(0x01 << (cs % 8));
-      }
-      else
-      {
-        // Set bit for selected LED.
-        leds[offset] |= 0x01 << (cs % 8);
-      }
+      _setLEDState(offset, cs, state);
 
       WritePagedReg(PAGEDREGISTER::LEDONOFF, offset, leds[offset]);
     }
@@ -326,17 +321,7 @@ namespace IS31FL3733
         // Calculate LED bit offset.
         offset = (sw << 1) + (cs / 8);
 
-        // Update state of LED in internal buffer.
-        if (states[sw * CS_LINES + cs] == LED_STATE::OFF)
-        {
-          // Clear bit for selected LED.
-          leds[offset] &= ~(0x01 << (cs % 8));
-        }
-        else
-        {
-          // Set bit for selected LED.
-          leds[offset] |= 0x01 << (cs % 8);
-        }
+        _setLEDState(offset, cs, states[sw * CS_LINES + cs]);
       }
     }
 
