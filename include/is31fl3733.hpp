@@ -238,10 +238,22 @@ namespace IS31FL3733
     i2c_write_function i2c_write_reg;      ///< Pointer to the i2C write register function.
     uint8_t leds[SW_LINES * CS_LINES / 8]; ///< State of individual LEDs. Bitmask that can't be read back from IS31FL3733.
 
+    /// @brief Writes every byte in the specified column of the paged register with the specified value.
+    /// @param reg The register to write to.
+    /// @param sw The column to write to. Origin 0, for example pass 0 to write to cs1.
+    /// @param value The value to write.
+    void _setColumnPagedRegister(const PAGEDREGISTER reg, const uint8_t cs, uint8_t value);
+
     /// @brief Writes every byte in the specified paged register with the specified value.
     /// @param reg The register to write to.
     /// @param value The value to write.
     void _setFullPagedRegister(const PAGEDREGISTER reg, const uint8_t value);
+
+    /// @brief Writes every byte in the specified row of the paged register with the specified value.
+    /// @param reg The register to write to.
+    /// @param sw The row to write to. Origin 0, for example pass 0 to write to sw1.
+    /// @param value The value to write.
+    void _setRowPagedRegister(const PAGEDREGISTER reg, const uint8_t sw, uint8_t value);
 
   public:
     /// @brief Construct a new IS31FL3733 object
@@ -358,7 +370,7 @@ namespace IS31FL3733
 
     /// @brief Set the LED state for all LED's from buffer.
     /// @param states An array of LED states for all 192 LEDs.
-    void SetState(const uint8_t *states);
+    void SetState(const LED_STATE *states);
 
     /// @brief Get the status of an LED.
     /// @param CS The LED's column position.

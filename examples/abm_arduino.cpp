@@ -135,7 +135,7 @@ void setup()
   Serial.println("Setting PWM state for all LEDs to half power");
   driver.SetLEDMatrixPWM(128);
 
-  Serial.println("Turning on all LEDs");
+  Serial.println("Setting state of all LEDs to ON");
   driver.SetLEDMatrixState(LED_STATE::ON);
 
   Serial.println("Configure all LEDs for ABM1");
