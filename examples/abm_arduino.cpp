@@ -6,9 +6,13 @@
  * @version 1.0.3
  * @date 2021-11-14
  * 
- * @copyright Copyright (c) 2021
+ * @copyright Copyright 2021
  * 
  */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Neil Enns. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 #include <Arduino.h>
 #include <Wire.h>
 
