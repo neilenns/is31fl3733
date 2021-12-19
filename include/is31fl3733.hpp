@@ -6,12 +6,11 @@
 #include <Arduino.h>
 #endif
 
-#include <stdint.h>
-
 namespace IS31FL3733
 {
-  const uint8_t CS_LINES = 16; ///< Number of CS lines on the chip.
-  const uint8_t SW_LINES = 12; ///< Number of SW lines on the chip.
+  const uint8_t CS_LINES = 16;                   ///< Number of CS lines on the chip.
+  const uint8_t SW_LINES = 12;                   ///< Number of SW lines on the chip.
+  const uint8_t LED_COUNT = CS_LINES * SW_LINES; ///< Total number of LEDs in the matrix.
 
   /// @brief Addresses for the common registers.
   enum COMMONREGISTER
@@ -232,11 +231,35 @@ namespace IS31FL3733
   {
   private:
     const uint8_t I2C_BASE_ADDR = 0xA0; ///< Base I2C address of the chip.
+    uint8_t maxI2CWriteBufferSize;      ///< Maximum number of bytes that can be written by i2c_write_buffer in a single call.
 
     uint8_t address;                       ///< Address on I2C bus.
     i2c_read_function i2c_read_reg;        ///< Pointer to I2C read register function.
     i2c_write_function i2c_write_reg;      ///< Pointer to the i2C write register function.
     uint8_t leds[SW_LINES * CS_LINES / 8]; ///< State of individual LEDs. Bitmask that can't be read back from IS31FL3733.
+
+    /// @brief Writes every byte in the specified column of the paged register with the specified value.
+    /// @param reg The register to write to.
+    /// @param sw The column to write to. Origin 0, for example pass 0 to write to cs1.
+    /// @param value The value to write.
+    void _setColumnPagedRegister(const PAGEDREGISTER reg, const uint8_t cs, uint8_t value);
+
+    /// @brief Writes every byte in the specified paged register with the specified value.
+    /// @param reg The register to write to.
+    /// @param value The value to write.
+    void _setFullPagedRegister(const PAGEDREGISTER reg, const uint8_t value);
+
+    /// @brief Writes every byte in the specified row of the paged register with the specified value.
+    /// @param reg The register to write to.
+    /// @param sw The row to write to. Origin 0, for example pass 0 to write to sw1.
+    /// @param value The value to write.
+    void _setRowPagedRegister(const PAGEDREGISTER reg, const uint8_t sw, uint8_t value);
+
+    /// @brief Sets the state of an LED in a single byte of the led array.
+    /// @param offset The position in the array for the LED byte.
+    /// @param cs The LED's column position. Origin 0, for example pass 0 to control cs1.
+    /// @param state The LED_STATE to set the LED to.
+    void _setLEDState(const uint8_t offset, const uint8_t cs, const LED_STATE state);
 
   public:
     /// @brief Construct a new IS31FL3733 object
@@ -311,17 +334,49 @@ namespace IS31FL3733
     /// @param resistor The value of the pull-down resistor to use.
     void SetCSPDR(const RESISTOR resistor);
 
-    /// @brief Set LED state to either ON or OFF.
-    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
-    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @brief Set a single LED state to either ON or OFF.
+    /// @param cs The LED's column position. Origin 0, for example pass 0 to control cs1.
+    /// @param sw The LED's row position. Origin 0, for example pass 0 to control sw1.
     /// @param state The LED_STATE to set the LED to.
-    void SetLEDState(uint8_t cs, uint8_t sw, const LED_STATE state);
+    void SetLEDSingleState(const uint8_t cs, const uint8_t sw, const LED_STATE state);
 
-    /// @brief Set the LED PWM duty value.
-    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
-    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @brief Sets all LEDs in the specified column to either ON or OFF.
+    /// @param cs The column to set. Origin 0, for example pass 0 to control cs1.
+    /// @param state The LED_STATE to set the LEDs to.
+    void SetLEDColumnState(uint8_t cs, const LED_STATE state);
+
+    /// @brief Sets all LEDs in the specified row to either ON or OFF.
+    /// @param sw The row to set. Origin 0, for example pass 0 to control sw1.
+    /// @param state The LED_STATE to set the LEDs to.
+    void SetLEDRowState(uint8_t sw, const LED_STATE state);
+
+    /// @brief Sets all LEDs to either ON or OFF.
+    /// @param cs The column to set. Origin 0, for example pass 0 to control cs1.    /// @param state The LED_STATE to set the LEDs to.
+    void SetLEDMatrixState(const LED_STATE state);
+
+    /// @brief Set the PWM duty value for a single LED.
+    /// @param cs The LED's column position. Origin 0, for example pass 0 to control cs1.
+    /// @param sw The LED's row position. Origin 0, for example pass 0 to control sw1.
     /// @param value The PWM duty cycle to set the LED to.
-    void SetLEDPWM(uint8_t cs, uint8_t sw, const uint8_t value);
+    void SetLEDSinglePWM(const uint8_t cs, const uint8_t sw, const uint8_t value);
+
+    /// @brief Set the PWM duty value for all LEDs in a column.
+    /// @param cs The column to set. Origin 0, for example pass 0 to control cs1.
+    /// @param value The PWM duty cycle to set the LEDs to.
+    void SetLEDColumnPWM(const uint8_t cs, const uint8_t value);
+
+    /// @brief Set the PWM duty value for all LEDs in a row.
+    /// @param sw The row to set. Origin 0, for example pass 0 to control sw1.
+    /// @param value The PWM duty cycle to set the LEDs to.
+    void SetLEDRowPWM(const uint8_t sw, const uint8_t value);
+
+    /// @brief Set the PWM duty value for all LEDs.
+    /// @param value The PWM duty cycle to set the LEDs to.
+    void SetLEDMatrixPWM(const uint8_t value);
+
+    /// @brief Set the LED state for all LED's from buffer.
+    /// @param states An array of LED states for all 192 LEDs.
+    void SetState(const LED_STATE *states);
 
     /// @brief Get the status of an LED.
     /// @param CS The LED's column position.
@@ -329,19 +384,29 @@ namespace IS31FL3733
     /// @returns The status of the LED.
     LED_STATUS GetLEDStatus(const uint8_t cs, const uint8_t sw);
 
-    /// @brief Set the LED state for all LED's from buffer.
-    /// @param states An array of LED states for all 192 LEDs.
-    void SetState(const uint8_t *states);
-
     /// @brief Set the LED PWN values for all LED's from buffer.
     /// @param states An array of PWM values for all 192 LEDs.
     void SetPWM(const uint8_t *values);
 
-    /// @brief Sets the LED operating mode for an LED.
-    /// @param cs The LED's column position. Use CS_COUNT to set all LEDs in the column.
-    /// @param sw The LED's row position. Use SW_COUNT to set all LEDs in the row.
+    /// @brief Sets the LED operating mode for a single LED.
+    /// @param cs The LED's column position. Origin 0, for example pass 0 to control cs1.
+    /// @param sw The LED's row position. Origin 0, for example pass 0 to control sw1.
     /// @param value The LED_MODE to set.
-    void SetLEDMode(uint8_t cs, uint8_t sw, const LED_MODE mode);
+    void SetLEDSingleMode(uint8_t cs, uint8_t sw, const LED_MODE mode);
+
+    /// @brief Set the LED operating mode for all LEDs in a row.
+    /// @param sw The row to set. Origin 0, for example pass 0 to control sw1.
+    /// @param value The LED_MODE to set.
+    void SetLEDRowMode(const uint8_t sw, const LED_MODE mode);
+
+    /// @brief Set the LED operating mode for all LEDs in a column.
+    /// @param sw The column to set. Origin 0, for example pass 0 to control cs1.
+    /// @param value The LED_MODE to set.
+    void SetLEDColumnMode(const uint8_t cs, const LED_MODE mode);
+
+    /// @brief Set the LED operating mode for all LEDs in the matrix.
+    /// @param value The LED_MODE to set.
+    void SetLEDMatrixMode(const LED_MODE mode);
 
     /// @brief Configures the ABM mode options.
     /// @param n The ABM to configure.

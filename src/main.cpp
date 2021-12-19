@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include <Wire.h>
 
@@ -9,7 +8,7 @@ using namespace IS31FL3733;
 // Arduino pin for the SDB line which is set high to enable the IS31FL3733 chip.
 const uint8_t SDB_PIN = 4;
 // Arduino pin for the IS13FL3733 interrupt pin.
-const uint8_t INTB_PIN = 7;
+const uint8_t INTB_PIN = 3;
 
 // Function prototypes for the read and write functions defined later in the file.
 uint8_t i2c_read_reg(const uint8_t i2c_addr, const uint8_t reg_addr, uint8_t *buffer, const uint8_t length);
@@ -60,22 +59,22 @@ uint8_t i2c_read_reg(const uint8_t i2c_addr, const uint8_t reg_addr, uint8_t *bu
 }
 
 /**
- * @brief Writes a buffer to the specified register.
+ * @brief Writes a buffer to the specified register. It is up to the caller to ensure the count of
+ * bytes to write doesn't exceed 31, which is the Arduino's write buffer size (32) minus one byte for
+ * the register address.
  * 
  * @param i2c_addr I2C address of the device to write the data to.
  * @param reg_addr Address of the register to write to.
  * @param buffer Pointer to an array of bytes to write.
  * @param count Number of bytes in the buffer.
- * @return uint8_t The number of bytes written.
+ * @return uint8_t 0 if success, non-zero on error.
  */
 uint8_t i2c_write_reg(const uint8_t i2c_addr, const uint8_t reg_addr, const uint8_t *buffer, const uint8_t count)
 {
   Wire.beginTransmission(i2c_addr);
   Wire.write(reg_addr);
-  byte bytesWritten = Wire.write(buffer, count);
-  Wire.endTransmission();
-
-  return bytesWritten;
+  Wire.write(buffer, count);
+  return Wire.endTransmission();
 }
 
 /**
@@ -122,14 +121,14 @@ void setup()
   Serial.println("Setting global current control to half");
   driver.SetGCC(127);
 
-  Serial.println("Setting PWM state for all LEDs to full power");
-  driver.SetLEDPWM(CS_LINES, SW_LINES, 255);
+  Serial.println("Setting PWM state for all LEDs to half power");
+  driver.SetLEDMatrixPWM(128);
 
-  Serial.println("Turning on all LEDs");
-  driver.SetLEDState(CS_LINES, SW_LINES, LED_STATE::ON);
+  Serial.println("Setting state of all LEDs to ON");
+  driver.SetLEDMatrixState(LED_STATE::ON);
 
   Serial.println("Configure all LEDs for ABM1");
-  driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::ABM1);
+  driver.SetLEDMatrixMode(LED_MODE::ABM1);
 
   ABM_CONFIG ABM1;
 
@@ -183,7 +182,7 @@ void loop()
     {
       Serial.println("ABM1 completed");
       Serial.println("Configure all LEDs for full on");
-      driver.SetLEDMode(CS_LINES, SW_LINES, LED_MODE::PWM);
+      driver.SetLEDMatrixMode(LED_MODE::PWM);
 
       ledState = LedState::LEDOn;
     }
