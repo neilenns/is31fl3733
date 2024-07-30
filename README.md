@@ -34,7 +34,7 @@ IS31FL3733Driver driver(ADDR::GND, ADDR::GND, &i2c_read_reg, &i2c_write_reg);
 
 ### Implementing the read and write register functions
 
-The `i2c_read_reg` and `i2c_write_reg` functions must be implmeneted for each platform
+The `i2c_read_reg` and `i2c_write_reg` functions must be implemented for each platform
 and take care of reading and writing data on the I2C bus.
 
 Example implementations for Arduino:
